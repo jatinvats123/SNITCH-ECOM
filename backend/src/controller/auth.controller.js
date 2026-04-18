@@ -2,7 +2,7 @@ import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import { config } from "../config/config.js";
 
-async function sendTokenResponse(user, res,message) {
+async function sendTokenResponse(user, res, message) {
   const token = jwt.sign(
     {
       id: user._id,
@@ -28,8 +28,10 @@ async function sendTokenResponse(user, res,message) {
     },
 }
 );
+}
+
 export const regitser = async (req, res) => {
-  const { email, contact, password, fullname.isSeller} = req.body;
+  const { email, contact, password, fullname, isSeller } = req.body;
 
   try {
     const existingUser = await userModel.findOne({
@@ -44,7 +46,7 @@ export const regitser = async (req, res) => {
       email,
       contact,
       password,
-      fullName,
+      fullName: fullname,
       role: isSeller ? "seller" : "buyer",
     });
     await sendTokenResponse(user, res, "User registered successfully");
@@ -52,4 +54,3 @@ export const regitser = async (req, res) => {
     throw error;
   }
 };
-}
