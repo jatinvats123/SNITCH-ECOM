@@ -22,4 +22,8 @@ export const validateRegisterUser = [
     .withMessage("Fullname must be string")
     .notEmpty()
     .withMessage("Fullname is required"),
+    body("isSeller")
+    .isBoolean()
+    .withMessage("isSeller must be a boolean")
+
 ];
