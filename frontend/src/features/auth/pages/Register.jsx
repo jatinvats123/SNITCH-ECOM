@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import {useAuth} from "../hook/useAuth"
+import {useAuth} from "../hook/useAuth";
+import {useNavigate} from "react-router";
 const Register = () => {
   const {handleRegister} = useAuth()
+const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     fullName: '',
     contactNumber: '',
@@ -27,7 +30,7 @@ const Register = () => {
       fullname:formData.fullName,
       isSeller:formData.isSeller,
     })
-    console.log('Form submitted:', formData);
+    navigate("/");
     // Add registration logic here
   };
 
@@ -120,7 +123,8 @@ const Register = () => {
             />
           </div>
 
-          <div className="flex items-center pt-2 pb-4">
+          <div className="pt-2 pb-4 space-y-3">
+            <div className="flex items-center">
             <input
               type="checkbox"
               id="isSeller"
@@ -132,6 +136,14 @@ const Register = () => {
             <label htmlFor="isSeller" className="ml-3 text-sm text-[#d0c6ab] cursor-pointer select-none">
               Register as a Seller
             </label>
+            </div>
+
+            <a
+              href="/api/auth/google"
+              className="inline-flex items-center justify-center px-1 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#FFD700] transition-all hover:underline"
+            >
+              Continue with Google
+            </a>
           </div>
 
           <button
@@ -143,7 +155,7 @@ const Register = () => {
         </form>
 
         <p className="mt-8 text-center text-xs text-[#d0c6ab]/70">
-          Already have an account? <a href="#" className="text-[#FFD700] hover:underline transition-all">Log in</a>
+          Already have an account? <a href="/login" className="text-[#FFD700] hover:underline transition-all">Log in</a>
         </p>
       </div>
     </div>
