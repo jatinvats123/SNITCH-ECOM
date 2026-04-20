@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {useAuth} from "../hook/useAuth";
 import {useNavigate} from "react-router";
+import ContinueWithGoogle from "../components/ContinueWithGoogle";
 const Register = () => {
   const {handleRegister} = useAuth()
 const navigate = useNavigate();
@@ -125,25 +126,18 @@ const navigate = useNavigate();
 
           <div className="pt-2 pb-4 space-y-3">
             <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isSeller"
-              name="isSeller"
-              checked={formData.isSeller}
-              onChange={handleChange}
-              className="w-5 h-5 rounded border-[#4D4732] bg-[#0E0E0E]/80 text-[#FFD700] focus:ring-[#FFD700] focus:ring-offset-[#131313] focus:ring-2 cursor-pointer transition-colors duration-200"
-            />
-            <label htmlFor="isSeller" className="ml-3 text-sm text-[#d0c6ab] cursor-pointer select-none">
-              Register as a Seller
-            </label>
+              <input
+                type="checkbox"
+                id="isSeller"
+                name="isSeller"
+                checked={formData.isSeller}
+                onChange={handleChange}
+                className="w-5 h-5 rounded border-[#4D4732] bg-[#0E0E0E]/80 text-[#FFD700] focus:ring-[#FFD700] focus:ring-offset-[#131313] focus:ring-2 cursor-pointer transition-colors duration-200"
+              />
+              <label htmlFor="isSeller" className="ml-3 text-sm text-[#d0c6ab] cursor-pointer select-none">
+                Register as a Seller
+              </label>
             </div>
-
-            <a
-              href="/api/auth/google"
-              className="inline-flex items-center justify-center px-1 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#FFD700] transition-all hover:underline"
-            >
-              Continue with Google
-            </a>
           </div>
 
           <button
@@ -152,6 +146,8 @@ const navigate = useNavigate();
           >
             Create Account
           </button>
+
+          <ContinueWithGoogle />
         </form>
 
         <p className="mt-8 text-center text-xs text-[#d0c6ab]/70">

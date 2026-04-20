@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from "../hook/useAuth";
 import { useNavigate } from "react-router";
-
+import ContinueWithGoogle from "../components/ContinueWithGoogle";
 const Login = () => {
   const { handleLogin } = useAuth();
   const navigate = useNavigate();
@@ -94,6 +94,7 @@ const Login = () => {
           >
             Log In
           </button>
+          <ContinueWithGoogle />
         </form>
 
         <p className="mt-8 text-center text-xs text-[#d0c6ab]/70">
