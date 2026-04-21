@@ -6,6 +6,7 @@ import cors from "cors";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import {config} from "./config/config.js";
+import productRouter from "./routes/product.routes.js";
 const app = express();
 
 app.use(morgan("dev"));
@@ -29,5 +30,5 @@ app.get("/", (_req, res) => {
     res.status(200).json({ message: "Server is running" });
 });
 app.use("/api/auth",authRouter);
-
+app.use("/api/products", productRouter);
 export default app;
