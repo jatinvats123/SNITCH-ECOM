@@ -89,5 +89,5 @@ export const googleCallBack = async (req, res) => {
   }, config.JWT_SECRET, {expiresIn:"100d"
   })
   res.cookie("token", token);
-  res.redirect("http://localhost:5173")
+  res.redirect("http://localhost:5173/?google=success")
 }
