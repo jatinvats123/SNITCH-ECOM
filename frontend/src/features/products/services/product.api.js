@@ -4,13 +4,15 @@ const productApiInstance = axios.create({
     baseURL:"/api/products",
     withCredentials:true
 })
-
-export async function getAllProducts(){
-    const response = await productApiInstance.get('/all')
+// FUNCTION FOR CREATING PRODUCT
+export async function createProduct(formData){
+    const response = await productApiInstance.post("/", formData)
     return response.data;
 }
 
-export async function getProductById(formData){
-    const response = await productApiInstance.get("/create")
+
+export async function getSellerProducts()
+{
+    const response = await productApiInstance.get("/seller")
     return response.data;
 }
