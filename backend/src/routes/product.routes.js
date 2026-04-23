@@ -17,7 +17,7 @@ const router = express.Router();
 // Only authenticated sellers can create products
 // Validate the request body and handle file uploads (up to 7 images)
 // The images will be processed in the controller, where they will be uploaded to a storage service and their URLs will be saved in the database
-router.post("/",authenticateSeller,createProductValidator,upload.array('images',7),createProduct)
+router.post("/",authenticateSeller,upload.array('images',7),createProductValidator,createProduct)
 //  @route GET /api/products/seller
 // desc Get all products of the authenticated seller
 // access Private (sellers only)
