@@ -5,7 +5,7 @@ import { setSellerProducts } from "../state/product.slice";
 export const useProduct=()=>{
     const dispatch = useDispatch();
     const handleCreateProduct = async (formData)=>{
-        const data = await crateProduct(formData);
+        const data = await createProduct(formData);
 
         return data.products;
     }
