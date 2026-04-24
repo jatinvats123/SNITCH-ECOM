@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from "../hook/useAuth";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import ContinueWithGoogle from "../components/ContinueWithGoogle";
+import Navbar from "../../../components/Navbar";
 const Login = () => {
   const { handleLogin } = useAuth();
   const navigate = useNavigate();
@@ -29,32 +30,24 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center lg:justify-end lg:pr-[12%] font-sans text-[#e5e2e1] relative overflow-hidden">
-      {/* Full Screen Background Image */}
-      <img 
-        src="/register-bg.png" 
-        alt="High fashion background" 
-        className="absolute inset-0 w-full h-full object-cover object-top mix-blend-luminosity opacity-40 z-0"
-      />
-      {/* Gradient Overlays for moody effect */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#131313] via-transparent to-[#131313] z-0 opacity-80"></div>
-      <div className="absolute inset-0 bg-[#FFD700] mix-blend-overlay opacity-10 z-0"></div>
-      
-      {/* Form Container - Centered Overlay */}
-      <div className="w-full max-w-md bg-[#1C1B1B]/70 backdrop-blur-2xl rounded-2xl p-10 shadow-2xl relative z-10 border border-[#4D4732]/30 m-6">
-        {/* Subtle decorative glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-[#FFD700] opacity-[0.05] blur-[80px] pointer-events-none"></div>
-        
-        <div className="mb-8 text-center relative z-10">
-          <h1 className="text-3xl font-light tracking-tight mb-1">
-            Welcome to <span className="text-[#FFD700] font-medium tracking-widest uppercase">Aveniq</span>
-          </h1>
-          <p className="text-[#d0c6ab] text-xs uppercase tracking-[0.2em]">The Digital Atelier</p>
-        </div>
+    <div className="min-h-screen bg-[#f5f5f3] text-black relative overflow-hidden font-sans">
+      <Navbar variant="light" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(0,0,0,0.04),transparent_42%)]" />
 
-        <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+      <main className="relative mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6 pb-16 pt-28 sm:pt-32">
+        <section className="w-full" style={{ maxWidth: 420 }}>
+          <div className="mb-12 text-center">
+            <h1 className="text-2xl font-light uppercase tracking-[0.28em] text-black sm:text-3xl">
+              My Account
+            </h1>
+            <p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-black/55">
+              Sign in to continue your curated shopping experience.
+            </p>
+          </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-xs font-semibold text-[#d0c6ab] mb-2 uppercase tracking-wider" htmlFor="email">
+            <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="email">
               Email Address
             </label>
             <input
@@ -65,16 +58,18 @@ const Login = () => {
               onChange={handleChange}
               placeholder="name@example.com"
               required
-              className="w-full bg-[#0E0E0E]/80 backdrop-blur-sm border border-[#4D4732]/40 rounded-md px-4 py-3.5 text-[#e5e2e1] placeholder-[#d0c6ab]/40 focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] focus:outline-none transition-all duration-300"
+              className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
             />
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-semibold text-[#d0c6ab] uppercase tracking-wider" htmlFor="password">
+            <div className="mb-2 flex items-center justify-between">
+              <label className="block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="password">
                 Password
               </label>
-              <a href="#" className="text-xs text-[#FFD700] hover:underline transition-all">Forgot your password?</a>
+              <a href="#" className="text-[11px] uppercase tracking-[0.22em] text-black/40 transition-all hover:text-black">
+                Forgot your password?
+              </a>
             </div>
             <input
               type="password"
@@ -84,23 +79,27 @@ const Login = () => {
               onChange={handleChange}
               placeholder="••••••••"
               required
-              className="w-full bg-[#0E0E0E]/80 backdrop-blur-sm border border-[#4D4732]/40 rounded-md px-4 py-3.5 text-[#e5e2e1] placeholder-[#d0c6ab]/40 focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] focus:outline-none transition-all duration-300"
+              className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-br from-[#E9C400] to-[#FFD700] text-[#3A3000] font-bold uppercase tracking-wider text-sm py-4 rounded-md hover:from-[#FFD700] hover:to-[#FFE16D] transition-all duration-300 shadow-[0_4px_24px_-8px_rgba(255,215,0,0.5)] transform hover:-translate-y-0.5 active:translate-y-0 mt-4"
+            className="mt-4 w-full border border-black bg-black py-4 text-[11px] font-medium uppercase tracking-[0.35em] text-white transition-all duration-300 hover:bg-white hover:text-black"
           >
             Log In
           </button>
           <ContinueWithGoogle />
         </form>
 
-        <p className="mt-8 text-center text-xs text-[#d0c6ab]/70">
-          Don't have an account? <a href="/register" className="text-[#FFD700] hover:underline transition-all">Create Account</a>
-        </p>
-      </div>
+          <Link
+            to="/register"
+            className="mt-5 inline-flex w-full items-center justify-center border border-black/15 px-5 py-4 text-[11px] uppercase tracking-[0.28em] text-black transition-all duration-300 hover:bg-black hover:text-white"
+          >
+            Don&apos;t have an account? Create Account
+          </Link>
+        </section>
+      </main>
     </div>
   );
 };

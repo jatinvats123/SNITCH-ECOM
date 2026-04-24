@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import {useAuth} from "../hook/useAuth";
-import {useNavigate} from "react-router";
+import { Link, useNavigate } from "react-router";
 import ContinueWithGoogle from "../components/ContinueWithGoogle";
+import Navbar from "../../../components/Navbar";
 const Register = () => {
   const {handleRegister} = useAuth()
 const navigate = useNavigate();
@@ -36,32 +37,24 @@ const navigate = useNavigate();
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center lg:justify-end lg:pr-[12%] font-sans text-[#e5e2e1] relative overflow-hidden">
-      {/* Full Screen Background Image */}
-      <img 
-        src="/register-bg.png" 
-        alt="High fashion background" 
-        className="absolute inset-0 w-full h-full object-cover object-top mix-blend-luminosity opacity-40 z-0"
-      />
-      {/* Gradient Overlays for moody effect */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#131313] via-transparent to-[#131313] z-0 opacity-80"></div>
-      <div className="absolute inset-0 bg-[#FFD700] mix-blend-overlay opacity-10 z-0"></div>
-      
-      {/* Form Container - Centered Overlay */}
-      <div className="w-full max-w-md bg-[#1C1B1B]/70 backdrop-blur-2xl rounded-2xl p-10 shadow-2xl relative z-10 border border-[#4D4732]/30 m-6">
-        {/* Subtle decorative glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-[#FFD700] opacity-[0.05] blur-[80px] pointer-events-none"></div>
-        
-        <div className="mb-8 text-center relative z-10">
-          <h1 className="text-3xl font-light tracking-tight mb-1">
-            Join <span className="text-[#FFD700] font-medium tracking-widest uppercase">Aveniq</span>
-          </h1>
-          <p className="text-[#d0c6ab] text-xs uppercase tracking-[0.2em]">The Digital Atelier</p>
-        </div>
+    <div className="min-h-screen bg-[#f5f5f3] text-black relative overflow-hidden font-sans">
+      <Navbar variant="light" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(0,0,0,0.04),transparent_42%)]" />
 
-        <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+      <main className="relative mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6 pb-16 pt-28 sm:pt-32">
+        <section className="w-full" style={{ maxWidth: 420 }}>
+          <div className="mb-12 text-center">
+            <h1 className="mt-4 text-2xl font-light uppercase tracking-[0.28em] text-black sm:text-3xl">
+              Create Account
+            </h1>
+            <p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-black/55">
+              Join the collection with a refined and minimal experience.
+            </p>
+          </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-xs font-semibold text-[#d0c6ab] mb-2 uppercase tracking-wider" htmlFor="fullName">
+            <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="fullName">
               Full Name
             </label>
             <input
@@ -72,12 +65,12 @@ const navigate = useNavigate();
               onChange={handleChange}
               placeholder="John Doe"
               required
-              className="w-full bg-[#0E0E0E]/80 backdrop-blur-sm border border-[#4D4732]/40 rounded-md px-4 py-3.5 text-[#e5e2e1] placeholder-[#d0c6ab]/40 focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] focus:outline-none transition-all duration-300"
+              className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#d0c6ab] mb-2 uppercase tracking-wider" htmlFor="contactNumber">
+            <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="contactNumber">
               Contact Number
             </label>
             <input
@@ -88,12 +81,12 @@ const navigate = useNavigate();
               onChange={handleChange}
               placeholder="+1 (555) 000-0000"
               required
-              className="w-full bg-[#0E0E0E]/80 backdrop-blur-sm border border-[#4D4732]/40 rounded-md px-4 py-3.5 text-[#e5e2e1] placeholder-[#d0c6ab]/40 focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] focus:outline-none transition-all duration-300"
+              className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#d0c6ab] mb-2 uppercase tracking-wider" htmlFor="email">
+            <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="email">
               Email Address
             </label>
             <input
@@ -104,12 +97,12 @@ const navigate = useNavigate();
               onChange={handleChange}
               placeholder="name@example.com"
               required
-              className="w-full bg-[#0E0E0E]/80 backdrop-blur-sm border border-[#4D4732]/40 rounded-md px-4 py-3.5 text-[#e5e2e1] placeholder-[#d0c6ab]/40 focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] focus:outline-none transition-all duration-300"
+              className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#d0c6ab] mb-2 uppercase tracking-wider" htmlFor="password">
+            <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="password">
               Password
             </label>
             <input
@@ -120,21 +113,21 @@ const navigate = useNavigate();
               onChange={handleChange}
               placeholder="••••••••"
               required
-              className="w-full bg-[#0E0E0E]/80 backdrop-blur-sm border border-[#4D4732]/40 rounded-md px-4 py-3.5 text-[#e5e2e1] placeholder-[#d0c6ab]/40 focus:border-[#FFD700] focus:ring-1 focus:ring-[#FFD700] focus:outline-none transition-all duration-300"
+              className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
             />
           </div>
 
-          <div className="pt-2 pb-4 space-y-3">
-            <div className="flex items-center">
+          <div className="pt-1 pb-2">
+            <div className="flex items-center gap-3">
               <input
                 type="checkbox"
                 id="isSeller"
                 name="isSeller"
                 checked={formData.isSeller}
                 onChange={handleChange}
-                className="w-5 h-5 rounded border-[#4D4732] bg-[#0E0E0E]/80 text-[#FFD700] focus:ring-[#FFD700] focus:ring-offset-[#131313] focus:ring-2 cursor-pointer transition-colors duration-200"
+                className="h-5 w-5 rounded border-black/20 bg-transparent text-black focus:ring-black/70 focus:ring-offset-0"
               />
-              <label htmlFor="isSeller" className="ml-3 text-sm text-[#d0c6ab] cursor-pointer select-none">
+              <label htmlFor="isSeller" className="cursor-pointer select-none text-sm text-black/70">
                 Register as a Seller
               </label>
             </div>
@@ -142,7 +135,7 @@ const navigate = useNavigate();
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-br from-[#E9C400] to-[#FFD700] text-[#3A3000] font-bold uppercase tracking-wider text-sm py-4 rounded-md hover:from-[#FFD700] hover:to-[#FFE16D] transition-all duration-300 shadow-[0_4px_24px_-8px_rgba(255,215,0,0.5)] transform hover:-translate-y-0.5 active:translate-y-0"
+            className="group w-full border border-black bg-black py-4 text-[11px] font-medium uppercase tracking-[0.35em] text-white transition-all duration-300 hover:bg-white hover:text-black"
           >
             Create Account
           </button>
@@ -150,10 +143,14 @@ const navigate = useNavigate();
           <ContinueWithGoogle />
         </form>
 
-        <p className="mt-8 text-center text-xs text-[#d0c6ab]/70">
-          Already have an account? <a href="/login" className="text-[#FFD700] hover:underline transition-all">Log in</a>
-        </p>
-      </div>
+          <Link
+            to="/login"
+            className="mt-5 inline-flex w-full items-center justify-center border border-black/15 px-5 py-4 text-[11px] uppercase tracking-[0.28em] text-black transition-all duration-300 hover:bg-black hover:text-white"
+          >
+            Already have an account? Log in
+          </Link>
+        </section>
+      </main>
     </div>
   );
 };
