@@ -17,6 +17,7 @@ const CreateProduct = () => {
   const [images, setImages] = useState([]); // [{ file, preview }]
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const fileInputRef = useRef(null);
 
@@ -53,6 +54,7 @@ const CreateProduct = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
+    setSuccess(null);
     try {
       const payload = new FormData();
       payload.append('title', formData.title);
@@ -61,8 +63,8 @@ const CreateProduct = () => {
       payload.append('priceCurrency', formData.priceCurrency);
       images.forEach(({ file }) => payload.append('images', file));
 
-      await handleCreateProduct(payload);
-      navigate(-1);
+      const response = await handleCreateProduct(payload);
+      setSuccess(response?.message || 'Product created successfully.');
     } catch (err) {
       setError(err?.response?.data?.message || 'Something went wrong. Please try again.');
     } finally {
@@ -147,6 +149,12 @@ const CreateProduct = () => {
         {error && (
           <div className="mb-6 px-4 py-3 bg-[#93000a]/20 border border-[#ffb4ab]/20 rounded-[4px] text-[#ffb4ab] text-[10px] font-bold uppercase tracking-[0.1em]">
             {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mb-6 px-4 py-3 bg-[#0f5132]/20 border border-[#75dba5]/20 rounded-[4px] text-[#75dba5] text-[10px] font-bold uppercase tracking-[0.1em]">
+            {success}
           </div>
         )}
 
@@ -351,6 +359,11 @@ const CreateProduct = () => {
             {error && (
               <div className="mb-4 px-4 py-3 bg-[#93000a]/20 border border-[#ffb4ab]/20 rounded-[4px] text-[#ffb4ab] text-[10px] font-bold uppercase tracking-[0.1em]">
                 {error}
+              </div>
+            )}
+            {success && (
+              <div className="mb-4 px-4 py-3 bg-[#0f5132]/20 border border-[#75dba5]/20 rounded-[4px] text-[#75dba5] text-[10px] font-bold uppercase tracking-[0.1em]">
+                {success}
               </div>
             )}
             <button

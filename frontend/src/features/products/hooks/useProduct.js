@@ -7,7 +7,7 @@ export const useProduct=()=>{
     const handleCreateProduct = async (formData)=>{
         const data = await createProduct(formData);
 
-        return data.products;
+        return data;
     }
     const handleGetProducts = async ()=>{
         const data = await getSellerProducts();
