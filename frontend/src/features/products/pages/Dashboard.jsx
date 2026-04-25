@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import { useProduct } from "../hooks/useProduct";
 import { useSelector } from "react-redux";
 
 const Dashboard = () => {
     const { handleGetProducts } = useProduct();
+    const navigate = useNavigate();
     const sellerProducts = useSelector((state) => state.product.sellerProducts);
 
     useEffect(() => {
@@ -16,93 +18,144 @@ const Dashboard = () => {
         { label: 'Total Sales', value: '₹0', icon: '💰' },
     ];
 
+    const navigationItems = ['Overview', 'Products', 'Orders', 'Analytics', 'Settings'];
+
     return (
-        <div className="min-h-screen bg-[#131313] text-[#E5E2E1] font-['Manrope'] selection:bg-[#FFD700] selection:text-[#131313]">
-            {/* Sidebar Overlay for Glass effect */}
-            <div className="fixed left-0 top-0 h-full w-64 bg-[#1C1B1B] border-r border-[#4D4732]/20 z-10 hidden md:block">
-                <div className="p-8">
-                    <h2 className="text-[#FFD700] text-2xl font-bold tracking-tighter mb-12">SNITCH.</h2>
-                    <nav className="space-y-6">
-                        {['Overview', 'Products', 'Orders', 'Analytics', 'Settings'].map((item) => (
-                            <div key={item} className={`cursor-pointer transition-all duration-300 hover:text-[#FFD700] ${item === 'Products' ? 'text-[#FFD700]' : 'text-[#D0C6AB]'}`}>
-                                <span className="text-sm uppercase tracking-widest font-semibold">{item}</span>
-                            </div>
-                        ))}
-                    </nav>
-                </div>
+        <div className="min-h-screen bg-[#f5f1ea] text-[#1f1b17] font-['Manrope'] selection:bg-[#1f1b17] selection:text-[#f5f1ea]">
+            <div className="pointer-events-none fixed inset-0 overflow-hidden">
+                <div className="absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#d8c39a]/25 blur-3xl" />
+                <div className="absolute right-0 top-32 h-80 w-80 rounded-full bg-[#efe5d1] blur-3xl" />
             </div>
 
-            {/* Main Content */}
-            <div className="md:ml-64 p-8 md:p-12">
-                {/* Header */}
-                <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-6">
+            <aside className="fixed left-0 top-0 z-10 hidden h-full w-72 border-r border-black/5 bg-[#f7f3ec]/90 backdrop-blur-xl md:block">
+                <div className="flex h-full flex-col justify-between p-8">
                     <div>
-                        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-2">Seller Dashboard</h1>
-                        <p className="text-[#D0C6AB] text-lg font-light">Managing your premium collection with precision.</p>
-                    </div>
-                    <button className="bg-[#FFD700] text-[#3a3000] px-8 py-4 rounded-md font-bold text-sm uppercase tracking-widest transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(255,215,0,0.2)]">
-                        + Add Product
-                    </button>
-                </header>
-
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-                    {stats.map((stat, idx) => (
-                        <div key={idx} className="bg-[#1C1B1B] p-8 rounded-xl border border-[#4D4732]/10 relative overflow-hidden group hover:border-[#FFD700]/30 transition-colors">
-                            <div className="absolute top-0 right-0 p-4 text-4xl opacity-10 group-hover:opacity-20 transition-opacity">
-                                {stat.icon}
-                            </div>
-                            <p className="text-[#D0C6AB] text-xs uppercase tracking-[0.2em] mb-2 font-semibold">{stat.label}</p>
-                            <h3 className="text-4xl font-bold">{stat.value}</h3>
+                        <div className="mb-14">
+                            <p className="text-[0.7rem] uppercase tracking-[0.35em] text-[#8a7a64]">Aveniq</p>
+                            <h2 className="mt-3 text-2xl font-semibold tracking-tight">Seller Studio</h2>
                         </div>
-                    ))}
-                </div>
 
-                {/* Product Section */}
-                <section>
-                    <div className="flex justify-between items-center mb-12 border-b border-[#4D4732]/10 pb-6">
-                        <h2 className="text-2xl font-bold tracking-tight">Your Products</h2>
-                        <span className="text-[#D0C6AB] text-sm uppercase tracking-[0.15em] font-medium">{sellerProducts?.length || 0} Items</span>
+                        <nav className="space-y-1">
+                            {navigationItems.map((item) => (
+                                <button
+                                    key={item}
+                                    className={`flex w-full items-center justify-between rounded-full px-4 py-3 text-left text-sm transition-colors ${item === 'Products'
+                                        ? 'bg-[#1f1b17] text-[#f7f3ec]'
+                                        : 'text-[#6d6357] hover:bg-black/5 hover:text-[#1f1b17]'
+                                        }`}
+                                >
+                                    <span>{item}</span>
+                                    {item === 'Products' ? <span className="h-2 w-2 rounded-full bg-[#d8c39a]" /> : null}
+                                </button>
+                            ))}
+                        </nav>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
-                        {sellerProducts?.map((product) => (
-                            <div key={product._id} className="group cursor-pointer">
-                                <div className="aspect-[3/4] w-full overflow-hidden rounded-lg bg-[#1C1B1B] mb-6 relative">
-                                    <img 
-                                        src={product.images[0]?.url || 'https://via.placeholder.com/300x400?text=No+Image'} 
-                                        alt={product.title} 
-                                        className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                                    />
-                                    {/* Hover Actions Overlay */}
-                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-4 backdrop-blur-sm">
-                                        <button title="Edit" className="bg-[#E5E2E1] text-[#131313] p-4 rounded-full hover:bg-[#FFD700] transition-colors transform translate-y-4 group-hover:translate-y-0 duration-300">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                                        </button>
-                                        <button title="Delete" className="bg-[#E5E2E1] text-[#131313] p-4 rounded-full hover:bg-[#ffb4ab] hover:text-[#690005] transition-colors transform translate-y-4 group-hover:translate-y-0 duration-300 delay-75">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                        </button>
-                                    </div>
-                                    <div className="absolute top-4 left-4">
-                                        <span className="bg-[#131313]/90 backdrop-blur-md px-4 py-1.5 rounded text-[9px] uppercase tracking-[0.2em] font-bold border border-[#FFD700]/20 text-[#FFD700]">
-                                            Active
-                                        </span>
-                                    </div>
+                    <div className="rounded-3xl border border-black/5 bg-white/70 p-5 shadow-[0_18px_50px_rgba(31,27,23,0.06)]">
+                        <p className="text-xs uppercase tracking-[0.25em] text-[#8a7a64]">Workspace</p>
+                        <p className="mt-3 text-sm leading-6 text-[#5d5448]">
+                            Keep product updates calm, clear, and easy to scan.
+                        </p>
+                    </div>
+                </div>
+            </aside>
+
+            <main className="relative md:ml-72">
+                <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 md:px-10 md:py-10 lg:px-12 lg:py-12">
+                    <header className="mb-10 flex flex-col gap-6 rounded-4xl border border-black/5 bg-white/75 p-6 shadow-[0_24px_80px_rgba(31,27,23,0.06)] backdrop-blur-xl sm:p-8 lg:flex-row lg:items-end lg:justify-between lg:p-10">
+                        <div className="max-w-2xl">
+                            <p className="text-[0.7rem] uppercase tracking-[0.35em] text-[#8a7a64]">Seller dashboard</p>
+                            <h1 className="mt-4 text-4xl font-semibold tracking-tight text-[#1f1b17] sm:text-5xl lg:text-6xl">
+                                A quiet command center for your catalog.
+                            </h1>
+                            <p className="mt-4 max-w-xl text-base leading-7 text-[#6d6357] sm:text-lg">
+                                Track products, review listings, and manage the store with more space and less noise.
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => navigate('/seller/create-products')}
+                            className="inline-flex items-center justify-center rounded-full bg-[#1f1b17] px-6 py-3 text-sm font-medium text-[#f7f3ec] transition-transform hover:-translate-y-0.5 hover:bg-[#2b251f]"
+                        >
+                            + Add Product
+                        </button>
+                    </header>
+
+                    <section className="mb-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                        {stats.map((stat) => (
+                            <div
+                                key={stat.label}
+                                className="rounded-[1.75rem] border border-black/5 bg-white/75 p-6 shadow-[0_18px_60px_rgba(31,27,23,0.05)] backdrop-blur-xl"
+                            >
+                                <div className="mb-8 flex items-center justify-between">
+                                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f3eadb] text-lg">
+                                        {stat.icon}
+                                    </span>
+                                    <span className="text-xs uppercase tracking-[0.25em] text-[#8a7a64]">Overview</span>
                                 </div>
-                                <div className="space-y-2">
-                                    <h3 className="text-xl font-bold truncate group-hover:text-[#FFD700] transition-colors duration-300">{product.title}</h3>
-                                    <div className="flex justify-between items-center">
-                                        <p className="text-[#E5E2E1] text-lg font-light tracking-wide">
-                                            {product.price.currency === 'INR' ? '₹' : product.price.currency === 'USD' ? '$' : ''}{product.price.amount.toLocaleString()}
-                                        </p>
-                                        <span className="text-[#D0C6AB] text-[10px] uppercase tracking-widest">{new Date(product.createdAt).toLocaleDateString()}</span>
-                                    </div>
-                                </div>
+                                <p className="text-sm uppercase tracking-[0.24em] text-[#8a7a64]">{stat.label}</p>
+                                <h3 className="mt-3 text-4xl font-semibold tracking-tight text-[#1f1b17]">{stat.value}</h3>
                             </div>
                         ))}
-                    </div>
-                </section>
-            </div>
+                    </section>
+
+                    <section className="rounded-4xl border border-black/5 bg-white/75 p-6 shadow-[0_24px_80px_rgba(31,27,23,0.06)] backdrop-blur-xl sm:p-8 lg:p-10">
+                        <div className="mb-8 flex flex-col gap-3 border-b border-black/5 pb-6 sm:flex-row sm:items-end sm:justify-between">
+                            <div>
+                                <p className="text-[0.7rem] uppercase tracking-[0.35em] text-[#8a7a64]">Inventory</p>
+                                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[#1f1b17] sm:text-3xl">Your products</h2>
+                            </div>
+                            <span className="text-sm text-[#6d6357]">{sellerProducts?.length || 0} items</span>
+                        </div>
+
+                        {sellerProducts?.length ? (
+                            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                                {sellerProducts.map((product) => (
+                                    <article
+                                        key={product._id}
+                                        className="group overflow-hidden rounded-[1.75rem] border border-black/5 bg-[#fbf8f3] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(31,27,23,0.08)]"
+                                    >
+                                        <div className="relative aspect-4/5 overflow-hidden bg-[#efe8de]">
+                                            <img
+                                                src={product.images[0]?.url || 'https://via.placeholder.com/300x400?text=No+Image'}
+                                                alt={product.title}
+                                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                            />
+                                            <div className="absolute left-4 top-4 rounded-full border border-white/40 bg-white/80 px-3 py-1 text-[0.65rem] uppercase tracking-[0.25em] text-[#5d5448] backdrop-blur-md">
+                                                Active
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4 p-5 sm:p-6">
+                                            <div className="space-y-1">
+                                                <h3 className="truncate text-lg font-medium text-[#1f1b17]">{product.title}</h3>
+                                                <p className="text-sm text-[#6d6357]">
+                                                    {product.price.currency === 'INR' ? '₹' : product.price.currency === 'USD' ? '$' : ''}
+                                                    {product.price.amount.toLocaleString()}
+                                                </p>
+                                            </div>
+
+                                            <div className="flex items-center justify-between border-t border-black/5 pt-4 text-xs uppercase tracking-[0.2em] text-[#8a7a64]">
+                                                <span>Listed</span>
+                                                <span>{new Date(product.createdAt).toLocaleDateString()}</span>
+                                            </div>
+                                        </div>
+                                    </article>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="rounded-[1.75rem] border border-dashed border-black/10 bg-[#fbf8f3] px-6 py-16 text-center sm:px-10">
+                                <p className="text-sm uppercase tracking-[0.3em] text-[#8a7a64]">No products yet</p>
+                                <h3 className="mt-4 text-2xl font-semibold tracking-tight text-[#1f1b17]">Create your first listing</h3>
+                                <p className="mx-auto mt-3 max-w-md text-base leading-7 text-[#6d6357]">
+                                    Add a product to start building out the catalog and make this dashboard come alive.
+                                </p>
+                            </div>
+                        )}
+                    </section>
+                </div>
+            </main>
         </div>
     );
 };

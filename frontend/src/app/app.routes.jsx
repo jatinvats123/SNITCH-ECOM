@@ -61,6 +61,10 @@ export const routes = createBrowserRouter([
         path:"/seller",
         children:[
             {
+                path:"/seller/create-products",
+                element:<CreateProduct/>
+            },
+            {
                 path:"/seller/create-product",
                 element:<CreateProduct/>
             },
