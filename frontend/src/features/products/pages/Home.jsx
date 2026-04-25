@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useProduct } from '../hooks/useProduct';
 import Navbar from '../../../components/Navbar';
@@ -6,14 +6,38 @@ import Navbar from '../../../components/Navbar';
 const Home = () => {
     const products = useSelector((state) => state.product.products);
     const { handleGetAllProducts } = useProduct();
+    const [liveTime, setLiveTime] = useState(() => new Date());
+
+    const dateFormatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Kolkata',
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+    });
+
+    const timeFormatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Kolkata',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: false,
+    });
 
     useEffect(() => {
         handleGetAllProducts();
     }, []);
 
+    useEffect(() => {
+        const intervalId = window.setInterval(() => {
+            setLiveTime(new Date());
+        }, 1000);
+
+        return () => window.clearInterval(intervalId);
+    }, []);
+
     return (
         <div className="min-h-screen bg-[#f5f5f3] text-black selection:bg-yellow-500/30">
-            <Navbar />
+            <Navbar animatedBrand />
 
             <section className="relative h-[99.6vh] min-h-135 overflow-hidden bg-black text-white">
                 <video
@@ -30,15 +54,28 @@ const Home = () => {
                 <div className="absolute inset-0 bg-black/45" />
                 <div className="absolute inset-0 bg-linear-to-b from-black/20 via-black/20 to-black/80" />
 
-                <div className="relative z-10 mx-auto flex h-full max-w-350 items-end px-5 pb-14 sm:px-8 sm:pb-20 lg:px-10">
-                    <div className="max-w-3xl">
-                        <p className="text-[11px] uppercase tracking-[0.35em] text-white/75">Aveniq</p>
-                        <h1 className="mt-4 text-4xl font-light leading-tight sm:text-5xl md:text-6xl">
-                            Fashion for everyday icons.
-                        </h1>
-                        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">
-                            Scroll down to explore the live collection. No login needed to browse products.
-                        </p>
+                <div className="relative z-10 mx-auto h-full max-w-350 px-5 sm:px-8 lg:px-10">
+                    <div className="absolute left-1/2 top-20 -translate-x-1/2 text-center sm:top-24 lg:top-20">
+                        <div className="inline-flex flex-wrap items-center justify-center gap-2 text-[9px] uppercase tracking-[0.28em] text-white/82 sm:text-[10px] md:text-[11px]">
+                            <span>India, Delhi</span>
+                            <span className="text-white/35">|</span>
+                            <span>
+                                {dateFormatter.format(liveTime)}
+                            </span>
+                            <span className="text-white/35">|</span>
+                            <span>
+                                {timeFormatter.format(liveTime)}
+                            </span>
+                            <span>IST</span>
+                        </div>
+                    </div>
+
+                    <div className="absolute left-5 right-5 bottom-14 sm:left-8 sm:right-8 sm:bottom-20 lg:left-10 lg:right-10">
+                        <div className="max-w-3xl">
+                            <h1 className="text-4xl font-light leading-tight sm:text-5xl md:text-6xl">
+                                Presence, tailored.
+                            </h1>
+                        </div>
                     </div>
                 </div>
             </section>
