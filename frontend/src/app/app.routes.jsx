@@ -6,8 +6,8 @@ import CreateProduct from "../features/products/pages/CreateProduct";
 import { useSelector } from "react-redux";
 import Navbar from "../components/Navbar";
 import Dashboard from "../features/products/pages/Dashboard";
-
-const Home = () => <h1>hello</h1>;
+import Protected from "../features/auth/components/Protected";
+import Home from "../features/products/pages/Home";
 
 const LandingPage = () => {
     return (
@@ -47,7 +47,7 @@ const RootPage = () => {
 export const routes = createBrowserRouter([
     {
         path:"/",
-        element:<RootPage/>
+        element:<Home/>
     },
     {
         path:"/register",
@@ -61,16 +61,15 @@ export const routes = createBrowserRouter([
         path:"/seller",
         children:[
             {
-                path:"/seller/create-products",
-                element:<CreateProduct/>
-            },
-            {
                 path:"/seller/create-product",
-                element:<CreateProduct/>
+                element:<Protected role="seller"><CreateProduct/></Protected>
+               
             },
             {
                 path:"/seller/dashboard",
-                element:<Dashboard/>
+                element:<Protected role="seller">
+                    <Dashboard/>
+                </Protected>
 
             }
         ]

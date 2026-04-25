@@ -3,6 +3,7 @@ import { authenticateSeller } from '../middleware/auth.middleware.js';
 import { createProduct } from '../controller/product.controller.js';
 import { createProductValidator } from '../validator/product.validator.js';
 import { getSellerProducts } from '../controller/product.controller.js';
+import { getAllProducts } from '../controller/product.controller.js';
 import multer from "multer";
 
 const upload = multer({
@@ -22,4 +23,8 @@ router.post("/",authenticateSeller,upload.array('images',7),createProductValidat
 // desc Get all products of the authenticated seller
 // access Private (sellers only)
 router.get("/seller",authenticateSeller,getSellerProducts)
+// @route GET /api/products
+// desc Get all products
+// access Public
+router.get("/",getAllProducts)
 export default router;

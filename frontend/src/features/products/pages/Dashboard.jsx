@@ -75,7 +75,7 @@ const Dashboard = () => {
 
                         <button
                             type="button"
-                            onClick={() => navigate('/seller/create-products')}
+                            onClick={() => navigate('/seller/create-product')}
                             className="inline-flex items-center justify-center rounded-full bg-[#1f1b17] px-6 py-3 text-sm font-medium text-[#f7f3ec] transition-transform hover:-translate-y-0.5 hover:bg-[#2b251f]"
                         >
                             + Add Product
