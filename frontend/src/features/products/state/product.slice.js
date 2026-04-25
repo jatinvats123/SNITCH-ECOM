@@ -8,7 +8,7 @@ const productSlice = createSlice({
     },
     reducers:{
         setSellerProducts:(state,action)=>{
-             state.sellerProducts = action.payload;
+             state.sellerProducts = action.payload; 
         }
     }
 })
