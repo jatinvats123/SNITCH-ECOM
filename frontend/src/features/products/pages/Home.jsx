@@ -13,9 +13,37 @@ const Home = () => {
 
     return (
         <div className="min-h-screen bg-[#f5f5f3] text-black selection:bg-yellow-500/30">
-            <Navbar variant="light" />
+            <Navbar />
+
+            <section className="relative h-[99.6vh] min-h-135 overflow-hidden bg-black text-white">
+                <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    poster="/register-bg.png"
+                    className="absolute inset-0 h-full w-full object-cover object-top opacity-75"
+                >
+                    <source src="/avnique%20video%20for%20login%20page.mp4" type="video/mp4" />
+                </video>
+
+                <div className="absolute inset-0 bg-black/45" />
+                <div className="absolute inset-0 bg-linear-to-b from-black/20 via-black/20 to-black/80" />
+
+                <div className="relative z-10 mx-auto flex h-full max-w-350 items-end px-5 pb-14 sm:px-8 sm:pb-20 lg:px-10">
+                    <div className="max-w-3xl">
+                        <p className="text-[11px] uppercase tracking-[0.35em] text-white/75">Aveniq</p>
+                        <h1 className="mt-4 text-4xl font-light leading-tight sm:text-5xl md:text-6xl">
+                            Fashion for everyday icons.
+                        </h1>
+                        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">
+                            Scroll down to explore the live collection. No login needed to browse products.
+                        </p>
+                    </div>
+                </div>
+            </section>
             
-            <main className="pt-24 pb-16 sm:pt-32 sm:pb-24 lg:pb-32 px-5 sm:px-8 lg:px-10 max-w-[1400px] mx-auto">
+            <main className="pt-24 pb-16 sm:pt-32 sm:pb-24 lg:pb-32 px-5 sm:px-8 lg:px-10 max-w-350 mx-auto">
                 {/* Header Section */}
                 <div className="mb-12 sm:mb-16 md:mb-20">
                     <h1 className="text-4xl sm:text-5xl md:text-6xl font-light tracking-tight mb-4">
@@ -33,7 +61,7 @@ const Home = () => {
                         {products.map((product) => (
                             <div key={product._id} className="group relative flex flex-col">
                                 {/* Image Container */}
-                                <div className="relative aspect-[3/4] w-full overflow-hidden bg-black/5 rounded-2xl mb-5">
+                                <div className="relative aspect-3/4 w-full overflow-hidden bg-black/5 rounded-2xl mb-5">
                                     <img
                                         src={product.images && product.images.length > 0 ? product.images[0].url : 'https://placehold.co/400x533/f5f5f3/000000/webp?text=No+Image'}
                                         alt={product.title}
