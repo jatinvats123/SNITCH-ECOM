@@ -32,10 +32,10 @@ const Navbar = ({ variant = "dark", animatedBrand = false }) => {
         <button
           type="button"
           aria-label="Open menu"
-          className={`group inline-flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300 ${
+          className={`group inline-flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 ${
             isLight
-              ? "border-black/10 bg-white/50 text-black/80 hover:border-black/20 hover:bg-white"
-              : "border-white/15 bg-white/5 text-white/90 hover:border-white/30 hover:bg-white/10"
+              ? "text-black/80"
+              : "text-white/90"
           }`}
         >
           <span className="flex flex-col gap-1.5">
@@ -91,10 +91,10 @@ const Navbar = ({ variant = "dark", animatedBrand = false }) => {
         <Link
           to="/register"
           aria-label="Go to register"
-          className={`group inline-flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300 ${
+          className={`group inline-flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 ${
             isLight
-              ? "border-black/10 bg-white/50 text-black/80 hover:border-black/20 hover:bg-white"
-              : "border-white/15 bg-white/5 text-white/90 hover:border-white/30 hover:bg-white/10"
+              ? "text-black/80"
+              : "text-white/90"
           }`}
         >
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">

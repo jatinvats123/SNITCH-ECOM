@@ -48,7 +48,7 @@ const Home = () => {
                     muted
                     playsInline
                     poster="/register-bg.png"
-                    className="absolute inset-0 h-full w-full object-cover object-top opacity-80"
+                    className="absolute inset-0 h-full w-full object-cover object-top opacity-70"
                 >
                     <source src="/avnique%20video%20for%20login%20page.mp4" type="video/mp4" />
                 </video>
@@ -59,11 +59,11 @@ const Home = () => {
 
                 {/* Live clock — top centre */}
                 <div className="absolute left-1/2 top-20 -translate-x-1/2 text-center sm:top-24">
-                    <div className="inline-flex flex-wrap items-center justify-center gap-2 text-[9px] uppercase tracking-[0.3em] text-black/50 sm:text-[10px]">
+                    <div className="inline-flex flex-wrap items-center justify-center gap-2 text-[9px] uppercase tracking-[0.3em] text-[rgba(0,0,0,0.88)] sm:text-[10px]">
                         <span>India, Delhi</span>
-                        <span className="text-black/20">|</span>
+                        <span>|</span>
                         <span>{dateFormatter.format(liveTime)}</span>
-                        <span className="text-black/20">|</span>
+                        <span>|</span>
                         <span>{timeFormatter.format(liveTime)}</span>
                         <span>IST</span>
                     </div>
@@ -72,7 +72,7 @@ const Home = () => {
                 {/* Hero copy — bottom left */}
                 <div className="absolute left-6 right-6 bottom-14 sm:left-10 sm:right-10 sm:bottom-20 lg:left-16 lg:right-16">
                     <div className="max-w-3xl">
-                        <h1 className="text-4xl font-light leading-tight text-black/90 sm:text-5xl md:text-6xl lg:text-7xl">
+                        <h1 className="text-4xl font-light leading-tight text-[rgba(0,0,0,0.88)] sm:text-5xl md:text-6xl lg:text-7xl">
                             Presence,<br />
                             <span className="italic">tailored.</span>
                         </h1>
@@ -136,7 +136,7 @@ const Home = () => {
                                     <h3 className="text-sm font-light text-black/80 leading-snug group-hover:text-black transition-colors duration-200">
                                         {product.title}
                                     </h3>
-                                    <p className="text-xs text-black/35 leading-relaxed line-clamp-2">
+                                    <p className="text-xs text-black/45 leading-relaxed line-clamp-2">
                                         {product.description}
                                     </p>
                                     <p className="mt-2 text-sm font-light text-black tracking-wide">
