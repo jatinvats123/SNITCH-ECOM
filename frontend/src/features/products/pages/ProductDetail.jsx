@@ -56,6 +56,24 @@ const ProductDetail = () => {
 
     return (
         <div className="min-h-screen bg-white text-black selection:bg-black/10">
+            <style>{`
+                @keyframes wavePass {
+                    0% {
+                        transform: translateX(0);
+                        opacity: 0;
+                    }
+                    18% {
+                        opacity: 1;
+                    }
+                    72% {
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translateX(320%);
+                        opacity: 0;
+                    }
+                }
+            `}</style>
             <Navbar variant="light" />
 
             {/* ── Page wrapper ── */}
@@ -145,18 +163,20 @@ const ProductDetail = () => {
                             <button
                                 id="buy-now-btn"
                                 type="button"
-                                className="w-full py-4 bg-black text-white text-[11px] uppercase tracking-[0.35em] hover:bg-black/85 active:scale-[0.99] transition-all duration-200"
+                                className="group relative w-full overflow-hidden py-4 bg-black text-white text-[11px] uppercase tracking-[0.35em] hover:bg-black/85 active:scale-[0.99] transition-all duration-200"
                             >
-                                Buy Now
+                                <span className="pointer-events-none absolute -left-1/3 top-0 h-full w-2/5 rounded-r-full bg-white opacity-0 group-hover:animate-[wavePass_700ms_ease-out_1]" />
+                                <span className="relative z-10">Buy Now</span>
                             </button>
 
                             {/* Add to Cart — secondary */}
                             <button
                                 id="add-to-cart-btn"
                                 type="button"
-                                className="w-full py-4 border border-black/15 text-black text-[11px] uppercase tracking-[0.35em] hover:border-black/50 hover:bg-black/3 active:scale-[0.99] transition-all duration-200"
+                                className="group relative w-full overflow-hidden py-4 border border-black/15 text-black text-[11px] uppercase tracking-[0.35em] hover:border-black/50 hover:bg-black/3 active:scale-[0.99] transition-all duration-200"
                             >
-                                Add to Cart
+                                <span className="pointer-events-none absolute -left-1/3 top-0 h-full w-2/5 rounded-r-full bg-black opacity-0 group-hover:animate-[wavePass_700ms_ease-out_1]" />
+                                <span className="relative z-10">Add to Cart</span>
                             </button>
                         </div>
 
