@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router';
 import { useProduct } from '../hooks/useProduct';
 import Navbar from '../../../components/Navbar';
 
 const Home = () => {
     const products = useSelector((state) => state.product.products);
+    const navigate = useNavigate();
     const { handleGetAllProducts } = useProduct();
     const [liveTime, setLiveTime] = useState(() => new Date());
 
@@ -31,116 +33,139 @@ const Home = () => {
         const intervalId = window.setInterval(() => {
             setLiveTime(new Date());
         }, 1000);
-
         return () => window.clearInterval(intervalId);
     }, []);
 
     return (
-        <div className="min-h-screen bg-[#f5f5f3] text-black selection:bg-yellow-500/30">
-            <Navbar animatedBrand />
+        <div className="min-h-screen bg-white text-black selection:bg-black/10">
+            <Navbar variant="light" animatedBrand />
 
-            <section className="relative h-[99.6vh] min-h-135 overflow-hidden bg-black text-white">
+            {/* ── Hero: Video ── */}
+            <section className="relative h-[99.6vh] min-h-[560px] overflow-hidden bg-[#f7f7f5]">
                 <video
                     autoPlay
                     loop
                     muted
                     playsInline
                     poster="/register-bg.png"
-                    className="absolute inset-0 h-full w-full object-cover object-top opacity-75"
+                    className="absolute inset-0 h-full w-full object-cover object-top opacity-80"
                 >
                     <source src="/avnique%20video%20for%20login%20page.mp4" type="video/mp4" />
                 </video>
 
-                <div className="absolute inset-0 bg-black/45" />
-                <div className="absolute inset-0 bg-linear-to-b from-black/20 via-black/20 to-black/80" />
+                {/* Soft dark overlay — just enough depth */}
+                <div className="absolute inset-0 bg-black/20" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-white/75" />
 
-                <div className="relative z-10 mx-auto h-full max-w-350 px-5 sm:px-8 lg:px-10">
-                    <div className="absolute left-1/2 top-20 -translate-x-1/2 text-center sm:top-24 lg:top-20">
-                        <div className="inline-flex flex-wrap items-center justify-center gap-2 text-[9px] uppercase tracking-[0.28em] text-white/82 sm:text-[10px] md:text-[11px]">
-                            <span>India, Delhi</span>
-                            <span className="text-white/35">|</span>
-                            <span>
-                                {dateFormatter.format(liveTime)}
-                            </span>
-                            <span className="text-white/35">|</span>
-                            <span>
-                                {timeFormatter.format(liveTime)}
-                            </span>
-                            <span>IST</span>
-                        </div>
+                {/* Live clock — top centre */}
+                <div className="absolute left-1/2 top-20 -translate-x-1/2 text-center sm:top-24">
+                    <div className="inline-flex flex-wrap items-center justify-center gap-2 text-[9px] uppercase tracking-[0.3em] text-black/50 sm:text-[10px]">
+                        <span>India, Delhi</span>
+                        <span className="text-black/20">|</span>
+                        <span>{dateFormatter.format(liveTime)}</span>
+                        <span className="text-black/20">|</span>
+                        <span>{timeFormatter.format(liveTime)}</span>
+                        <span>IST</span>
                     </div>
+                </div>
 
-                    <div className="absolute left-5 right-5 bottom-14 sm:left-8 sm:right-8 sm:bottom-20 lg:left-10 lg:right-10">
-                        <div className="max-w-3xl">
-                            <h1 className="text-4xl font-light leading-tight sm:text-5xl md:text-6xl">
-                                Presence, tailored.
-                            </h1>
-                        </div>
+                {/* Hero copy — bottom left */}
+                <div className="absolute left-6 right-6 bottom-14 sm:left-10 sm:right-10 sm:bottom-20 lg:left-16 lg:right-16">
+                    <div className="max-w-3xl">
+                        <h1 className="text-4xl font-light leading-tight text-black/90 sm:text-5xl md:text-6xl lg:text-7xl">
+                            Presence,<br />
+                            <span className="italic">tailored.</span>
+                        </h1>
                     </div>
                 </div>
             </section>
-            
-            <main className="pt-24 pb-16 sm:pt-32 sm:pb-24 lg:pb-32 px-5 sm:px-8 lg:px-10 max-w-350 mx-auto">
-                {/* Header Section */}
-                <div className="mb-12 sm:mb-16 md:mb-20">
-                    <h1 className="text-4xl sm:text-5xl md:text-6xl font-light tracking-tight mb-4">
-                        Discover collection
-                        <span className="block text-yellow-500 font-medium italic mt-2">New Arrivals.</span>
-                    </h1>
-                    <p className="text-black/60 max-w-xl text-sm sm:text-base leading-relaxed">
-                        Explore our latest premium arrivals designed for the modern individual. Elevate your aesthetic with cutting-edge fashion that pushes boundaries.
+
+            {/* ── Products Section ── */}
+            <main className="max-w-screen-xl mx-auto px-6 sm:px-10 lg:px-16 pt-24 pb-36">
+
+                {/* Section header */}
+                <div className="mb-20">
+                    <p className="text-[10px] uppercase tracking-[0.4em] text-black/30 mb-6">
+                        New Arrivals
                     </p>
+                    <div className="flex items-end justify-between gap-6">
+                        <h2 className="text-3xl sm:text-4xl font-light text-black leading-snug">
+                            Discover the<br />
+                            <span className="italic">collection.</span>
+                        </h2>
+                        <p className="hidden sm:block text-sm text-black/35 leading-relaxed max-w-xs text-right">
+                            Premium pieces designed for the modern individual who moves with quiet confidence.
+                        </p>
+                    </div>
                 </div>
 
-                {/* Products Grid */}
+                {/* Rule */}
+                <div className="w-full h-px bg-black/8 mb-16" />
+
+                {/* Grid */}
                 {products && products.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12 sm:gap-x-8 sm:gap-y-16">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-20">
                         {products.map((product) => (
-                            <div key={product._id} className="group relative flex flex-col">
-                                {/* Image Container */}
-                                <div className="relative aspect-3/4 w-full overflow-hidden bg-black/5 rounded-2xl mb-5">
+                            <div
+                                key={product._id}
+                                onClick={() => navigate(`/product/${product._id}`)}
+                                className="group cursor-pointer"
+                            >
+                                {/* Image */}
+                                <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#f7f7f5] mb-6">
                                     <img
-                                        src={product.images && product.images.length > 0 ? product.images[0].url : 'https://placehold.co/400x533/f5f5f3/000000/webp?text=No+Image'}
+                                        src={
+                                            product.images?.length > 0
+                                                ? product.images[0].url
+                                                : 'https://placehold.co/400x533/f7f7f5/cccccc/webp?text='
+                                        }
                                         alt={product.title}
-                                        className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                                        className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-[1.03]"
                                     />
-                                    
-                                    {/* Hover Overlay */}
-                                    <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                    
-                                    {/* Add to Cart Button */}
-                                    <div className="absolute bottom-4 left-4 right-4 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 flex gap-2">
-                                        <button className="w-full rounded-xl bg-white/70 backdrop-blur-md border border-black/10 py-3 text-sm font-medium text-black hover:bg-yellow-500 hover:border-yellow-500 hover:text-black transition-colors duration-300 shadow-sm">
-                                            Quick Add
-                                        </button>
+
+                                    {/* Hover CTA */}
+                                    <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
+                                        <div className="py-3.5 bg-black text-white text-[10px] uppercase tracking-[0.35em] text-center">
+                                            View Product
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Product Info */}
-                                <div className="flex flex-col gap-1.5 px-1">
-                                    <h3 className="text-base font-medium text-black/90 line-clamp-1 group-hover:text-yellow-600 transition-colors">
+                                {/* Info */}
+                                <div className="flex flex-col gap-2 px-0.5">
+                                    <h3 className="text-sm font-light text-black/80 leading-snug group-hover:text-black transition-colors duration-200">
                                         {product.title}
                                     </h3>
-                                    <p className="text-sm text-black/50 line-clamp-2 leading-relaxed">
+                                    <p className="text-xs text-black/35 leading-relaxed line-clamp-2">
                                         {product.description}
                                     </p>
-                                    <div className="mt-2 flex items-center justify-between">
-                                        <p className="text-lg font-medium text-black">
-                                            {product.price?.currency === 'INR' ? '₹' : '$'}
-                                            {product.price?.amount?.toLocaleString()}
-                                        </p>
-                                    </div>
+                                    <p className="mt-2 text-sm font-light text-black tracking-wide">
+                                        {product.price?.currency === 'INR' ? '₹' : '$'}
+                                        {product.price?.amount?.toLocaleString('en-IN')}
+                                    </p>
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-32 text-center">
-                        <div className="w-16 h-16 border-t-2 border-r-2 border-yellow-500 rounded-full animate-spin mb-6"></div>
-                        <p className="text-black/50 tracking-wider uppercase text-sm">Loading collection...</p>
+                    <div className="flex flex-col items-center justify-center py-40 gap-6">
+                        <div className="w-8 h-8 rounded-full border border-black/15 border-t-black/50 animate-spin" />
+                        <p className="text-[10px] uppercase tracking-[0.35em] text-black/30">
+                            Loading collection…
+                        </p>
                     </div>
                 )}
             </main>
+
+            {/* Footer strip */}
+            <footer className="border-t border-black/8 py-10 px-6 sm:px-10 lg:px-16 max-w-screen-xl mx-auto">
+                <div className="flex items-center justify-between">
+                    <p className="text-[10px] uppercase tracking-[0.35em] text-black/25">Aveniq</p>
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-black/20">
+                        © {new Date().getFullYear()}
+                    </p>
+                </div>
+            </footer>
         </div>
     );
 };
