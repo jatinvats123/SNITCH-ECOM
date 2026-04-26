@@ -108,11 +108,11 @@ const Dashboard = () => {
                             </div>
                             <span className="text-sm text-[#6d6357]">{sellerProducts?.length || 0} items</span>
                         </div>
-
-                        {sellerProducts?.length ? (
-                            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                        {sellerProducts && sellerProducts.length > 0 ? (
+                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                 {sellerProducts.map((product) => (
                                     <article
+                                        onClick={() => navigate(`/seller/product/${product._id}`)}
                                         key={product._id}
                                         className="group overflow-hidden rounded-[1.75rem] border border-black/5 bg-[#fbf8f3] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(31,27,23,0.08)]"
                                     >

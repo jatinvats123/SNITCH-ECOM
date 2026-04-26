@@ -21,6 +21,7 @@ const ProductDetail = () => {
         fetchProductDetail();
     }, [productId]);
 
+
     const formatPrice = (amount, currency) => {
         const symbol = currency === 'INR' ? '₹' : '$';
         return `${symbol}${amount?.toLocaleString('en-IN')}`;
