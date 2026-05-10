@@ -14,3 +14,10 @@ export const createProductValidator = [
     body("priceCurrency").notEmpty().withMessage("Price currency is required").isString().withMessage("Price currency must be a string"),
     validateRequest
 ]
+
+export const createVariantValidator = [
+    body("price.amount").notEmpty().withMessage("Price amount is required").isNumeric().withMessage("Price amount must be a number"),
+    body("price.currency").notEmpty().withMessage("Price currency is required").isString().withMessage("Price currency must be a string"),
+    body("stock").optional().isNumeric().withMessage("Stock must be a number"),
+    validateRequest
+]
