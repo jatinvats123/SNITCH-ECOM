@@ -66,10 +66,12 @@ export async function getProductDetail(req,res){
 }
 
 export async function addProductVariant(req,res){
-  
+
   try{
     const { productId } = req.params;
-    const { title, description, priceAmount, priceCurrency, size, color, stock } = req.body;
+    const { title, description, stock, attributes } = req.body;
+    const priceAmount = req.body.price?.amount;
+    const priceCurrency = req.body.price?.currency;
     const seller = req.user;
 
     const product = await productModel.findById(productId);
@@ -106,8 +108,7 @@ export async function addProductVariant(req,res){
         currency: priceCurrency || product.price.currency
       },
       images,
-      size,
-      color,
+      attributes,
       stock: stock || 0
     };
 
@@ -126,5 +127,52 @@ export async function addProductVariant(req,res){
       success:false,
       error: error.message
     })
+  }
+}
+
+export async function deleteVariant(req, res) {
+  try {
+    const { productId, variantId } = req.params;
+    const seller = req.user;
+
+    const product = await productModel.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found",
+        success: false
+      });
+    }
+
+    // Verify seller owns this product
+    if (product.seller.toString() !== seller._id.toString()) {
+      return res.status(403).json({
+        message: "You are not authorized to delete variants from this product",
+        success: false
+      });
+    }
+
+    // Find and remove the variant
+    const variantIndex = product.variants.findIndex(v => v._id.toString() === variantId);
+    if (variantIndex === -1) {
+      return res.status(404).json({
+        message: "Variant not found",
+        success: false
+      });
+    }
+
+    product.variants.splice(variantIndex, 1);
+    await product.save();
+
+    res.status(200).json({
+      message: "Variant deleted successfully",
+      success: true,
+      product
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error deleting variant",
+      success: false,
+      error: error.message
+    });
   }
 }

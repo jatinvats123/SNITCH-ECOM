@@ -11,10 +11,7 @@ async function sendTokenResponse(user, res, message) {
     { expiresIn: "100d" }
   );
 
-
-
- res.cookie("token", token)
-
+  res.cookie("token", token);
 
   res.status(200).json({
     message,
@@ -26,8 +23,7 @@ async function sendTokenResponse(user, res, message) {
         fullName: user.fullName,
         role: user.role,
     },
-}
-);
+  });
 }
 
 export const regitser = async (req, res) => {
@@ -51,7 +47,7 @@ export const regitser = async (req, res) => {
     });
     await sendTokenResponse(user, res, "User registered successfully");
   } catch (error) {
-    throw error;
+    res.status(500).json({ message: "Error registering user", error: error.message });
   }
 };
 

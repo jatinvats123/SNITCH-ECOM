@@ -1,4 +1,12 @@
-import { body } from "express-validator";
+import { body, validationResult } from "express-validator";
+
+function validateRequest(req, res, next) {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(400).json({errors: errors.array()})
+    }
+    next();
+}
 
 export const validateRegisterUser = [
   body("email")
@@ -24,8 +32,9 @@ export const validateRegisterUser = [
     .withMessage("Fullname is required"),
     body("isSeller")
     .isBoolean()
-    .withMessage("isSeller must be a boolean")
-
+    .withMessage("isSeller must be a boolean"),
+    
+  validateRequest
 ];
 export const validateLoginUser = [
   body("email")
@@ -34,6 +43,7 @@ export const validateLoginUser = [
 
   body("password")
     .isString()
-    .withMessage("Password must be string")
-   
+    .withMessage("Password must be string"),
+    
+  validateRequest
 ];

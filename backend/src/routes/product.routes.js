@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticateSeller } from '../middleware/auth.middleware.js';
-import { createProduct, addProductVariant } from '../controller/product.controller.js';
+import { createProduct, addProductVariant, deleteVariant } from '../controller/product.controller.js';
 import { createProductValidator, createVariantValidator } from '../validator/product.validator.js';
 import { getSellerProducts } from '../controller/product.controller.js';
 import { getAllProducts } from '../controller/product.controller.js';
@@ -46,5 +46,10 @@ router.get("/detail/:productId",getProductDetail)
 
 router.post("/:productId/variants",authenticateSeller,upload.array('images',7),
 createVariantValidator,addProductVariant)
+
+// @route DELETE /api/products/:productId/variants/:variantId
+// @desc Delete a variant from a product
+// @access Private (sellers only)
+router.delete("/:productId/variants/:variantId", authenticateSeller, deleteVariant)
 
 export default router;

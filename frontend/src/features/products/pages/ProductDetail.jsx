@@ -9,13 +9,15 @@ const ProductDetail = () => {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
+    const [selectedVariant, setSelectedVariant] = useState(null);
     const { handleGetProductById } = useProduct();
-
+ console.log(product)
     useEffect(() => {
         async function fetchProductDetail() {
             setLoading(true);
             const data = await handleGetProductById(productId);
             setProduct(data);
+            setSelectedVariant(null);
             setLoading(false);
         }
         fetchProductDetail();
@@ -25,6 +27,40 @@ const ProductDetail = () => {
       const formatPrice = (amount, currency) => {
         const symbol = currency === 'INR' ? '₹' : '$';
         return `${symbol}${amount?.toLocaleString('en-IN')}`;
+    };
+
+    // Get display values from variant or product
+    const getDisplayValue = (key) => {
+        if (selectedVariant) {
+            if (key === 'price') return selectedVariant.price || product.price;
+            if (key === 'images') return selectedVariant.images?.length > 0 ? selectedVariant.images : product.images;
+            if (key === 'stock') return selectedVariant.stock;
+            if (key === 'attributes') return selectedVariant.attributes;
+        }
+        if (key === 'price') return product.price;
+        if (key === 'images') return product.images;
+        if (key === 'attributes') return null;
+        return null;
+    };
+
+    // Get all unique attributes from all variants
+    const getAllAttributes = () => {
+        const attrSet = new Map();
+        if (product?.variants) {
+            product.variants.forEach(variant => {
+                if (variant.attributes) {
+                    Object.entries(variant.attributes).forEach(([key, value]) => {
+                        if (!attrSet.has(key)) {
+                            attrSet.set(key, []);
+                        }
+                        if (!attrSet.get(key).includes(value)) {
+                            attrSet.get(key).push(value);
+                        }
+                    });
+                }
+            });
+        }
+        return attrSet;
     };
 
     /* ── Loading ── */
@@ -51,9 +87,12 @@ const ProductDetail = () => {
         );
     }
 
-    const images = product.images?.length > 0 ? product.images : [];
+    const images = getDisplayValue('images')?.length > 0 ? getDisplayValue('images') : [];
     const currentImage = images[selectedImage]?.url
         || 'https://placehold.co/800x1000/f7f7f7/cccccc/webp?text=';
+    const displayPrice = getDisplayValue('price');
+    const displayStock = getDisplayValue('stock');
+    const displayAttributes = getDisplayValue('attributes');
 
     return (
         <div className="min-h-screen bg-white text-black selection:bg-black/10">
@@ -143,9 +182,16 @@ const ProductDetail = () => {
                         </h1>
 
                         {/* Price */}
-                        <p className="text-2xl font-light tracking-wide text-black mb-16">
-                            {formatPrice(product.price?.amount, product.price?.currency)}
+                        <p className="text-2xl font-light tracking-wide text-black mb-4">
+                            {formatPrice(displayPrice?.amount, displayPrice?.currency)}
                         </p>
+
+                        {/* Stock info */}
+                        {displayStock !== null && (
+                            <p className="text-sm text-black/50 mb-16">
+                                {displayStock > 0 ? `${displayStock} in stock` : 'Out of stock'}
+                            </p>
+                        )}
 
                         {/* Rule */}
                         <div className="w-full h-px bg-black/8 mb-12" />
@@ -158,7 +204,63 @@ const ProductDetail = () => {
                         {/* Rule */}
                         <div className="w-full h-px bg-black/8 mb-14" />
 
-                        {/* CTA buttons */}
+                        {/* Variants selector */}
+                        {product.variants && product.variants.length > 0 && (
+                            <div className="mb-14">
+                                <div className="mb-6">
+                                    <p className="text-[10px] uppercase tracking-[0.35em] text-black/50 mb-4">
+                                        Available Variants
+                                    </p>
+                                    <div className="flex flex-wrap gap-4">
+                                        {product.variants.map((variant, idx) => {
+                                            const isSelected = selectedVariant?._id === variant._id;
+                                            const variantImage = variant.images?.[0]?.url || product.images?.[0]?.url || 'https://placehold.co/100x100/f7f7f7/cccccc';
+                                            const variantAttrs = variant.attributes ? Object.entries(variant.attributes).map(([k, v]) => `${k}: ${v}`).join(' / ') : `Variant ${idx + 1}`;
+                                            
+                                            return (
+                                                <button
+                                                    key={variant._id}
+                                                    onClick={() => {
+                                                        setSelectedVariant(variant);
+                                                        setSelectedImage(0);
+                                                    }}
+                                                    className={`relative w-24 h-28 overflow-hidden transition-all duration-200 ${
+                                                        isSelected
+                                                            ? 'ring-2 ring-black ring-offset-2'
+                                                            : 'ring-1 ring-black/20 hover:ring-black/50'
+                                                    }`}
+                                                    title={variantAttrs}
+                                                >
+                                                    <img
+                                                        src={variantImage}
+                                                        alt={variantAttrs}
+                                                        className="w-full h-full object-cover object-center"
+                                                    />
+                                                    {isSelected && (
+                                                        <div className="absolute inset-0 bg-black/10" />
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    {selectedVariant && (
+                                        <button
+                                            onClick={() => {
+                                                setSelectedVariant(null);
+                                                setSelectedImage(0);
+                                            }}
+                                            className="mt-3 text-[10px] uppercase tracking-[0.3em] text-black/50 hover:text-black underline underline-offset-2 transition-colors"
+                                        >
+                                            Clear selection
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="w-full h-px bg-black/8" />
+                            </div>
+                        )}
+
+                        {/* Rule */}
+                        <div className="w-full h-px bg-black/8 mb-14" />
                         <div className="flex flex-col gap-4 mb-16">
                             {/* Buy Now — primary */}
                             <button
