@@ -69,10 +69,15 @@ export async function addProductVariant(req,res){
 
   try{
     const { productId } = req.params;
-    const { title, description, stock, attributes } = req.body;
+    let { title, description, stock, attributes } = req.body;
     const priceAmount = req.body.price?.amount;
     const priceCurrency = req.body.price?.currency;
     const seller = req.user;
+
+    // Parse attributes if it's a JSON string
+    if (typeof attributes === 'string') {
+      attributes = JSON.parse(attributes);
+    }
 
     const product = await productModel.findById(productId);
     if(!product){
@@ -91,13 +96,16 @@ export async function addProductVariant(req,res){
     }
 
     // Upload variant images
-    const images = await Promise.all(req.files.map(async (file) => {
-      const uploaded = await uploadFile({
-        buffer: file.buffer,
-        fileName: file.originalname,
-      });
-      return { url: uploaded.url };
-    }));
+    let images = [];
+    if(req.files && req.files.length > 0) {
+      images = await Promise.all(req.files.map(async (file) => {
+        const uploaded = await uploadFile({
+          buffer: file.buffer,
+          fileName: file.originalname,
+        });
+        return { url: uploaded.url };
+      }));
+    }
 
     // Add variant to product
     const variant = {
@@ -108,8 +116,8 @@ export async function addProductVariant(req,res){
         currency: priceCurrency || product.price.currency
       },
       images,
-      attributes,
-      stock: stock || 0
+      attributes: attributes || {},
+      stock: Number(stock) || 0
     };
 
     product.variants = product.variants || [];
@@ -122,6 +130,7 @@ export async function addProductVariant(req,res){
       product
     })
   }catch(error){
+    console.error("Error adding variant:", error);
     res.status(500).json({
       message:"Error adding variant",
       success:false,

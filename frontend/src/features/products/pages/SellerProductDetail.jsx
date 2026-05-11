@@ -72,10 +72,8 @@ const SellerProductDetail = () => {
         formData.append('price[currency]', form.price.currency);
         formData.append('stock', Number(form.stock) || 0);
         
-        // Add attributes
-        Object.entries(attrMap).forEach(([key, value]) => {
-            formData.append(`attributes[${key}]`, value);
-        });
+        // Add attributes as JSON string
+        formData.append('attributes', JSON.stringify(attrMap));
 
         // Add image files
         form.images.forEach((file) => {
