@@ -1,8 +1,6 @@
 import mongoose from "mongoose";
 
-'
-
-const priceSchema = new mongoose.Schems({
+const priceSchema = new mongoose.Schema({
     amount:{
         type:Number,
         required:true
@@ -13,8 +11,6 @@ const priceSchema = new mongoose.Schems({
         required:true,
         default:"INR"
     }   
-    }, _id: false ,
-_versionKey: false
-});
+}, { _id: false, versionKey: false });
 
 export default priceSchema

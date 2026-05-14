@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useProduct } from '../hooks/useProduct';
+import { useCart } from '../../cart/hooks/useCart';
 import Navbar from '../../../components/Navbar';
 
 const ProductDetail = () => {
@@ -11,6 +12,7 @@ const ProductDetail = () => {
     const [selectedImage, setSelectedImage] = useState(0);
     const [selectedVariant, setSelectedVariant] = useState(null);
     const { handleGetProductById } = useProduct();
+    const { handleAddToCart } = useCart();
  console.log(product)
     useEffect(() => {
         async function fetchProductDetail() {
@@ -274,6 +276,7 @@ const ProductDetail = () => {
 
                             {/* Add to Cart — secondary */}
                             <button
+                                onClick={() => handleAddToCart(product._id, selectedVariant?._id)}
                                 id="add-to-cart-btn"
                                 type="button"
                                 className="group relative w-full overflow-hidden py-4 border border-black/15 text-black text-[11px] uppercase tracking-[0.35em] hover:border-black/50 hover:bg-black/3 active:scale-[0.99] transition-all duration-200"

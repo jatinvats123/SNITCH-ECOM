@@ -54,17 +54,12 @@ const productSchema = new mongoose.Schema({
                     type:Map,
                     of:String
                 },
-               
-                    },
-                    price: { type: priceSchema, required: true }
-                },
-                {
-                    variantId: {
-                        type: mongoose.Schema.Types.ObjectId,
-                        ref: 'Variant',
-                        required: true
-                    }
-                }   
+            price: { type: priceSchema, required: true },
+            variantId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Variant',
+                required: true
+            }
         }
     ]
 },
