@@ -8,6 +8,9 @@ import cartRouter from "./routes/cart.routes.js";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import {config} from "./config/config.js";
 import productRouter from "./routes/product.routes.js";
+import userModel from "./models/user.model.js";
+import productModel from "./models/productModel.js";
+import cartModel from "./models/cartModel.js";
 const app = express();
 
 app.use(cors({
