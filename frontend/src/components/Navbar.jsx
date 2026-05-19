@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
+import { useSelector } from "react-redux";
 
 const Navbar = ({ variant = "dark", animatedBrand = false }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const isLight = variant === "light";
+  const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -88,29 +90,50 @@ const Navbar = ({ variant = "dark", animatedBrand = false }) => {
           </Link>
         </div>
 
-        <Link
-          to="/register"
-          aria-label="Go to register"
-          className={`group inline-flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 ${
-            isLight
-              ? "text-black/80"
-              : "text-white/90"
-          }`}
-        >
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M20 21a8 8 0 10-16 0"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-            />
-            <path
-              d="M12 12a4 4 0 100-8 4 4 0 000 8z"
-              stroke="currentColor"
-              strokeWidth="1.6"
-            />
-          </svg>
-        </Link>
+        <div className="flex items-center gap-3">
+          {user && (
+            <Link
+              to="/cart"
+              aria-label="Cart"
+              className={`group inline-flex items-center gap-2 px-3 py-2 rounded-full backdrop-blur-md transition-all duration-300 ${
+                isLight
+                  ? "text-black/80 hover:bg-black/5"
+                  : "text-white/90 hover:bg-white/10"
+              }`}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M7 4V3C7 2.45 7.45 2 8 2H16C16.55 2 17 2.45 17 3V4H21C21.55 4 22 4.45 22 5C22 5.55 21.55 6 21 6H20.92L19.12 19.5C18.96 20.84 17.8 21.9 16.46 21.9H7.54C6.2 21.9 5.04 20.84 4.88 19.5L3.08 6H2C1.45 6 1 5.55 1 5C1 4.45 1.45 4 2 4H7ZM9 9C8.45 9 8 9.45 8 10V17C8 17.55 8.45 18 9 18C9.55 18 10 17.55 10 17V10C10 9.45 9.55 9 9 9ZM15 9C14.45 9 14 9.45 14 10V17C14 17.55 14.45 18 15 18C15.55 18 16 17.55 16 17V10C16 9.45 15.55 9 15 9Z" />
+              </svg>
+              <span className={`text-xs font-medium uppercase tracking-[0.2em] hidden sm:inline ${isLight ? "text-black" : "text-white"}`}>
+                {user.name || user.email?.split('@')[0]}
+              </span>
+            </Link>
+          )}
+
+          <Link
+            to="/register"
+            aria-label="Go to register"
+            className={`group inline-flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 ${
+              isLight
+                ? "text-black/80"
+                : "text-white/90"
+            }`}
+          >
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M20 21a8 8 0 10-16 0"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+              <path
+                d="M12 12a4 4 0 100-8 4 4 0 000 8z"
+                stroke="currentColor"
+                strokeWidth="1.6"
+              />
+            </svg>
+          </Link>
+        </div>
       </div>
     </header>
   );

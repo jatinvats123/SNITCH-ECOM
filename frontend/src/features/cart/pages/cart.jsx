@@ -6,7 +6,7 @@ import Navbar from '../../../components/Navbar';
 
 const Cart = () => {
     const cartItems = useSelector((state) => state.cart.items);
-    const { handleGetCart } = useCart();
+    const { handleGetCart, handleAddToCart, handleIncrementCartItemQuantity } = useCart();
     const navigate = useNavigate();
     const [quantities, setQuantities] = useState({});
 
@@ -40,6 +40,21 @@ const Cart = () => {
         setQuantities((prev) => ({
             ...prev,
             [itemId]: newQuantity,
+        }));
+    };
+
+    const handleIncrement = (item) => {
+        setQuantities((prev) => ({
+            ...prev,
+            [item._id]: (prev[item._id] || 1) + 1,
+        }));
+        handleIncrementCartItemQuantity(item.product._id, item.variant);
+    };
+
+    const handleDecrement = (item) => {
+        setQuantities((prev) => ({
+            ...prev,
+            [item._id]: Math.max(1, (prev[item._id] || 1) - 1),
         }));
     };
 
@@ -126,18 +141,26 @@ const Cart = () => {
                                             <div className="flex items-end justify-between">
                                                 <div className="flex items-center gap-4">
                                                     <div>
-                                                        <label className="text-[10px] uppercase tracking-[0.25em] text-black/50 mb-1 block">
+                                                        <label className="text-[10px] uppercase tracking-[0.25em] text-black/50 mb-2 block">
                                                             Quantity
                                                         </label>
-                                                        <input
-                                                            type="number"
-                                                            min="1"
-                                                            value={quantities[item._id] || item.quantity}
-                                                            onChange={(e) =>
-                                                                handleQuantityChange(item._id, e.target.value)
-                                                            }
-                                                            className="w-16 px-3 py-2 border border-black/15 bg-white text-center text-sm focus:border-black outline-none transition-colors"
-                                                        />
+                                                        <div className="flex items-center border border-black/15 rounded-lg overflow-hidden">
+                                                            <button
+                                                                onClick={() => handleDecrement(item)}
+                                                                className="px-3 py-2 hover:bg-black/5 transition-colors text-black/70 hover:text-black font-medium"
+                                                            >
+                                                                −
+                                                            </button>
+                                                            <div className="px-4 py-2 border-l border-r border-black/15 text-center min-w-[40px]">
+                                                                {quantities[item._id] || item.quantity}
+                                                            </div>
+                                                            <button
+                                                                onClick={() => handleIncrement(item)}
+                                                                className="px-3 py-2 hover:bg-black/5 transition-colors text-black/70 hover:text-black font-medium"
+                                                            >
+                                                                +
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
 

@@ -80,3 +80,36 @@ export const getCart = async (req,res) => {
         })
     }
 }
+
+export async function incrementCartItemQuantity(req,res){
+    try {
+        const {productId, variantId}=req.params;
+        const user = req.user;    
+        const cart = await cartModel.findOne({user:user._id}).populate("items.product").populate("items.variant");
+        if(!cart){
+            return res.status(404).json({
+                message:"Cart not found",
+                success:false
+            })
+        }
+        const item = cart.items.find(i=>i.product.toString()===productId && i.variant?.toString()===variantId);
+        if(!item){
+            return res.status(404).json({
+                message:"Item not found in cart",
+                success:false
+            })
+        }
+        item.quantity+=1;
+        await cart.save();
+        return res.status(200).json({
+            message:"Item quantity incremented successfully",
+            success:true
+        })
+    } catch (error) {
+        console.error("Error incrementing cart item quantity:", error);
+        return res.status(500).json({
+            message: error.message || "Error incrementing cart item quantity",
+            success: false
+        })  
+    }
+}
