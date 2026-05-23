@@ -3,16 +3,42 @@ import { useSelector } from 'react-redux';
 import { useCart } from '../hooks/useCart';
 import { useNavigate } from 'react-router';
 import Navbar from '../../../components/Navbar';
-
+import { useRazorpay } from "react-razorpay";
 const Cart = () => {
     const cartItems = useSelector((state) => state.cart.items);
     const { handleGetCart, handleAddToCart, handleIncrementCartItemQuantity } = useCart();
     const navigate = useNavigate();
     const [quantities, setQuantities] = useState({});
+    const { error, isLoading, Razorpay } = useRazorpay();
 
     useEffect(() => {
         handleGetCart();
     }, []);
+  const handlePayment = () => {
+    const options: RazorpayOrderOptions = {
+      key: "YOUR_RAZORPAY_KEY",
+      amount: 50000, // Amount in paise
+      currency: "INR",
+      name: "Test Company",
+      description: "Test Transaction",
+      order_id: "order_9A33XWu170gUtm", // Generate order_id on server
+      handler: (response) => {
+        console.log(response);
+        alert("Payment Successful!");
+      },
+      prefill: {
+        name: "John Doe",
+        email: "john.doe@example.com",
+        contact: "9999999999",
+      },
+      theme: {
+        color: "#F37254",
+      },
+    };
+
+    const razorpayInstance = new Razorpay(options);
+    razorpayInstance.open();
+  };
 
     useEffect(() => {
         if (cartItems && cartItems.length > 0) {
@@ -223,7 +249,8 @@ const Cart = () => {
                                 </div>
                             </div>
 
-                            <button className="w-full py-4 bg-black text-white text-[11px] font-medium uppercase tracking-[0.35em] hover:bg-black/90 transition-all duration-300 mb-4">
+                            <button className="w-full py-4 bg-black text-white text-[11px] font-medium uppercase tracking-[0.35em] hover:bg-black/90 transition-all duration-300 mb-4"
+                            onClick={handlePayment}>
                                 Proceed to Checkout
                             </button>
 
