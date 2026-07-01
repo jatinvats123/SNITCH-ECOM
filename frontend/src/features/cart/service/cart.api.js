@@ -19,3 +19,9 @@ export const incrementCartItemQuantity = async (productId, variantId) => {
     const response = await cartApiInstance.patch(`/quantity/increament/${productId}/${variantId}`);
     return response.data;
 }
+
+export const removeItem = async (productId, variantId) => {
+    const path = variantId ? `/remove/${productId}/${variantId}` : `/remove/${productId}`;
+    const response = await cartApiInstance.delete(path);
+    return response.data;
+}

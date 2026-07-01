@@ -4,6 +4,7 @@ import { validateAddToCart } from '../validator/cart.validator.js';
 import { addToCart } from '../controller/cart.controller.js';
 import { getCart } from '../controller/cart.controller.js';
 import { incrementCartItemQuantity } from '../controller/cart.controller.js';
+import { removeCartItem } from '../controller/cart.controller.js';
 const router = express.Router();
 
 // add item to cart 
@@ -21,5 +22,11 @@ router.get("/",authenticateUser,getCart)
 // patch api/cart/quantity/increament/:productId/:variantId
 // desc update cart item quantity by incrementing it by 1
 router.patch("/quantity/increament/:productId/:variantId", authenticateUser,incrementCartItemQuantity);
+
+// delete api/cart/remove/:productId
+// delete api/cart/remove/:productId/:variantId
+// desc remove item from cart
+router.delete("/remove/:productId", authenticateUser, removeCartItem);
+router.delete("/remove/:productId/:variantId", authenticateUser, removeCartItem);
 
 export default router;

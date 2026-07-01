@@ -1,4 +1,4 @@
-import { addItem,getCart, incrementCartItemQuantity } from "../service/cart.api";
+import { addItem,getCart, incrementCartItemQuantity, removeItem } from "../service/cart.api";
 import { useDispatch } from "react-redux";
 import { addItem as addItemToCart, setItems } from "../state/cart.slice";
 
@@ -32,5 +32,14 @@ export const useCart = () =>{
         }
     }
 
-    return { handleAddToCart,handleGetCart, handleIncrementCartItemQuantity, };
+    async function handleRemoveCartItem(productId, variantId) {
+        try {
+            const data = await removeItem(productId, variantId);
+            dispatch(setItems(data.cart.items));
+        } catch (error) {
+            console.error("Error removing cart item:", error);
+        }
+    }
+
+    return { handleAddToCart, handleGetCart, handleIncrementCartItemQuantity, handleRemoveCartItem };
 }

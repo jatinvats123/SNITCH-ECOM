@@ -6,7 +6,7 @@ import Navbar from '../../../components/Navbar';
 import { useRazorpay } from "react-razorpay";
 const Cart = () => {
     const cartItems = useSelector((state) => state.cart.items);
-    const { handleGetCart, handleAddToCart, handleIncrementCartItemQuantity } = useCart();
+    const { handleGetCart, handleAddToCart, handleIncrementCartItemQuantity, handleRemoveCartItem } = useCart();
     const navigate = useNavigate();
     const [quantities, setQuantities] = useState({});
     const { error, isLoading, Razorpay } = useRazorpay();
@@ -15,7 +15,7 @@ const Cart = () => {
         handleGetCart();
     }, []);
   const handlePayment = () => {
-    const options: RazorpayOrderOptions = {
+    const options = {
       key: "YOUR_RAZORPAY_KEY",
       amount: 50000, // Amount in paise
       currency: "INR",
@@ -70,11 +70,17 @@ const Cart = () => {
     };
 
     const handleIncrement = (item) => {
+        const variantId = item.variant?._id || item.variant;
         setQuantities((prev) => ({
             ...prev,
             [item._id]: (prev[item._id] || 1) + 1,
         }));
-        handleIncrementCartItemQuantity(item.product._id, item.variant);
+        handleIncrementCartItemQuantity(item.product._id, variantId);
+    };
+
+    const handleRemove = (item) => {
+        const variantId = item.variant?._id || item.variant;
+        handleRemoveCartItem(item.product._id, variantId);
     };
 
     const handleDecrement = (item) => {
@@ -139,7 +145,7 @@ const Cart = () => {
                                 >
                                     <div className="flex gap-6">
                                         {/* Product Image */}
-                                        <div className="flex-shrink-0">
+                                        <div className="shrink-0">
                                             <div className="w-24 h-32 sm:w-32 sm:h-40 bg-[#f0ede7] rounded-lg overflow-hidden">
                                                 <img
                                                     src={
@@ -177,7 +183,7 @@ const Cart = () => {
                                                             >
                                                                 −
                                                             </button>
-                                                            <div className="px-4 py-2 border-l border-r border-black/15 text-center min-w-[40px]">
+                                                            <div className="px-4 py-2 border-l border-r border-black/15 text-center min-w-10">
                                                                 {quantities[item._id] || item.quantity}
                                                             </div>
                                                             <button
@@ -206,7 +212,10 @@ const Cart = () => {
 
                                         {/* Remove Button */}
                                         <div className="flex flex-col justify-start">
-                                            <button className="text-[10px] uppercase tracking-[0.25em] text-red-600 hover:text-red-700 transition-colors">
+                                            <button
+                                                onClick={() => handleRemove(item)}
+                                                className="text-[10px] uppercase tracking-[0.25em] text-red-600 hover:text-red-700 transition-colors"
+                                            >
                                                 Remove
                                             </button>
                                         </div>

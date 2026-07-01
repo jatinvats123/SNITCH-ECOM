@@ -113,3 +113,40 @@ export async function incrementCartItemQuantity(req,res){
         })  
     }
 }
+
+export async function removeCartItem(req, res) {
+    try {
+        const { productId, variantId } = req.params;
+        const user = req.user;
+        const cart = await cartModel.findOne({ user: user._id });
+
+        if (!cart) {
+            return res.status(404).json({
+                message: "Cart not found",
+                success: false,
+            });
+        }
+
+        const pullCriteria = variantId
+            ? { product: productId, variant: variantId }
+            : { product: productId, $or: [{ variant: { $exists: false } }, { variant: null }] };
+
+        const updatedCart = await cartModel.findByIdAndUpdate(
+            cart._id,
+            { $pull: { items: pullCriteria } },
+            { new: true }
+        ).populate("items.product").populate("items.variant");
+
+        return res.status(200).json({
+            message: "Item removed from cart successfully",
+            success: true,
+            cart: updatedCart,
+        });
+    } catch (error) {
+        console.error("Error removing cart item:", error);
+        return res.status(500).json({
+            message: error.message || "Error removing item from cart",
+            success: false,
+        });
+    }
+}
