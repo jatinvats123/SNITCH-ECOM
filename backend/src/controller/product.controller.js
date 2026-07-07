@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import productModel from "../models/productModel.js";
 import { uploadFile } from "../services/storage.service.js";
 
@@ -70,8 +71,8 @@ export async function addProductVariant(req,res){
   try{
     const { productId } = req.params;
     let { title, description, stock, attributes } = req.body;
-    const priceAmount = req.body.price?.amount;
-    const priceCurrency = req.body.price?.currency;
+    const priceAmount = req.body.price?.amount ?? req.body["price.amount"] ?? req.body["price[amount]"];
+    const priceCurrency = req.body.price?.currency ?? req.body["price.currency"] ?? req.body["price[currency]"];
     const seller = req.user;
 
     // Parse attributes if it's a JSON string
@@ -88,7 +89,9 @@ export async function addProductVariant(req,res){
     }
 
     // Verify seller owns this product
-    if(product.seller.toString() !== seller._id.toString()){
+    const productSellerId = String(product.seller?._id ?? product.seller);
+    const currentSellerId = String(seller?._id ?? seller);
+    if(productSellerId !== currentSellerId){
       return res.status(403).json({
         message:"You are not authorized to add variants to this product",
         success:false
@@ -112,12 +115,13 @@ export async function addProductVariant(req,res){
       title: title || product.title,
       description: description || product.description,
       price: {
-        amount: priceAmount || product.price.amount,
+        amount: Number(priceAmount ?? product.price.amount),
         currency: priceCurrency || product.price.currency
       },
       images,
       attributes: attributes || {},
-      stock: Number(stock) || 0
+      stock: Number(stock) || 0,
+      variantId: new mongoose.Types.ObjectId()
     };
 
     product.variants = product.variants || [];
@@ -153,7 +157,9 @@ export async function deleteVariant(req, res) {
     }
 
     // Verify seller owns this product
-    if (product.seller.toString() !== seller._id.toString()) {
+    const productSellerId = String(product.seller?._id ?? product.seller);
+    const currentSellerId = String(seller?._id ?? seller);
+    if (productSellerId !== currentSellerId) {
       return res.status(403).json({
         message: "You are not authorized to delete variants from this product",
         success: false
