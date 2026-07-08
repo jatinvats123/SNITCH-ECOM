@@ -4,13 +4,25 @@ import { useProduct } from "../hooks/useProduct";
 import { useSelector } from "react-redux";
 
 const Dashboard = () => {
-    const { handleGetProducts } = useProduct();
+    const { handleGetProducts, handleDeleteProduct } = useProduct();
     const navigate = useNavigate();
     const sellerProducts = useSelector((state) => state.product.sellerProducts);
 
     useEffect(() => {
         handleGetProducts();
     }, []);
+
+    const handleDeleteListing = async (productId, title) => {
+        const confirmed = window.confirm(`Delete ${title}? This will remove the listing from your store.`);
+        if (!confirmed) return;
+
+        try {
+            await handleDeleteProduct(productId);
+            await handleGetProducts();
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const stats = [
         { label: 'Total Products', value: sellerProducts?.length || 0, icon: '📦' },
@@ -112,11 +124,13 @@ const Dashboard = () => {
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                 {sellerProducts.map((product) => (
                                     <article
-                                        onClick={() => navigate(`/seller/product/${product._id}`)}
                                         key={product._id}
                                         className="group overflow-hidden rounded-[1.75rem] border border-black/5 bg-[#fbf8f3] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(31,27,23,0.08)]"
                                     >
-                                        <div className="relative aspect-4/5 overflow-hidden bg-[#efe8de]">
+                                        <div
+                                            onClick={() => navigate(`/seller/product/${product._id}`)}
+                                            className="relative aspect-4/5 overflow-hidden bg-[#efe8de] cursor-pointer"
+                                        >
                                             <img
                                                 src={product.images[0]?.url || 'https://via.placeholder.com/300x400?text=No+Image'}
                                                 alt={product.title}
@@ -125,6 +139,16 @@ const Dashboard = () => {
                                             <div className="absolute left-4 top-4 rounded-full border border-white/40 bg-white/80 px-3 py-1 text-[0.65rem] uppercase tracking-[0.25em] text-[#5d5448] backdrop-blur-md">
                                                 Active
                                             </div>
+                                            <button
+                                                type="button"
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    handleDeleteListing(product._id, product.title);
+                                                }}
+                                                className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[0.65rem] uppercase tracking-[0.25em] text-[#8b3c2b] shadow-sm transition-colors hover:bg-white hover:text-[#5f1f14]"
+                                            >
+                                                Remove
+                                            </button>
                                         </div>
 
                                         <div className="space-y-4 p-5 sm:p-6">

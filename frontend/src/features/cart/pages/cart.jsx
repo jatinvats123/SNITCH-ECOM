@@ -6,7 +6,7 @@ import Navbar from '../../../components/Navbar';
 import { useRazorpay } from "react-razorpay";
 const Cart = () => {
     const cartItems = useSelector((state) => state.cart.items);
-    const { handleGetCart, handleAddToCart, handleIncrementCartItemQuantity, handleRemoveCartItem } = useCart();
+    const { handleGetCart, handleAddToCart, handleIncrementCartItemQuantity, handleDecrementCartItemQuantity, handleRemoveCartItem } = useCart();
     const navigate = useNavigate();
     const [quantities, setQuantities] = useState({});
     const { error, isLoading, Razorpay } = useRazorpay();
@@ -55,6 +55,22 @@ const Cart = () => {
         return `${symbol}${amount?.toLocaleString('en-IN') || 0}`;
     };
 
+    const getVariantLabel = (item) => {
+        const variantAttributes = item.variant?.attributes || item.variantSnapshot?.attributes;
+        const labelFromAttributes = variantAttributes
+            ? Object.entries(variantAttributes)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join(' / ')
+            : '';
+
+        return item.variantSnapshot?.label || labelFromAttributes || item.variant?.title || '';
+    };
+
+    const getItemImage = (item) =>
+        item.variant?.images?.[0]?.url ||
+        item.variantSnapshot?.images?.[0]?.url ||
+        item.product?.images?.[0]?.url;
+
     const calculateTotal = () => {
         return cartItems.reduce((total, item) => {
             return total + (item.price?.amount * item.quantity || 0);
@@ -83,11 +99,16 @@ const Cart = () => {
         handleRemoveCartItem(item.product._id, variantId);
     };
 
-    const handleDecrement = (item) => {
-        setQuantities((prev) => ({
-            ...prev,
-            [item._id]: Math.max(1, (prev[item._id] || 1) - 1),
-        }));
+    const handleDecrement = async (item) => {
+        const variantId = item.variant?._id || item.variant;
+        const currentQuantity = quantities[item._id] || item.quantity || 1;
+
+        if (currentQuantity <= 1) {
+            await handleRemoveCartItem(item.product._id, variantId);
+            return;
+        }
+
+        await handleDecrementCartItemQuantity(item.product._id, variantId);
     };
 
     if (!cartItems || cartItems.length === 0) {
@@ -148,10 +169,7 @@ const Cart = () => {
                                         <div className="shrink-0">
                                             <div className="w-24 h-32 sm:w-32 sm:h-40 bg-[#f0ede7] rounded-lg overflow-hidden">
                                                 <img
-                                                    src={
-                                                        item.product?.images?.[0]?.url ||
-                                                        'https://placehold.co/300x400/f7f7f7/cccccc'
-                                                    }
+                                                    src={getItemImage(item) || 'https://placehold.co/300x400/f7f7f7/cccccc'}
                                                     alt={item.product?.title}
                                                     className="w-full h-full object-cover"
                                                 />
@@ -164,6 +182,11 @@ const Cart = () => {
                                                 <h3 className="text-lg sm:text-xl font-medium text-black mb-2 line-clamp-2">
                                                     {item.product?.title}
                                                 </h3>
+                                                {getVariantLabel(item) && (
+                                                    <p className="text-[10px] uppercase tracking-[0.25em] text-black/45 mb-3">
+                                                        {getVariantLabel(item)}
+                                                    </p>
+                                                )}
                                                 <p className="text-sm text-black/60 mb-4 line-clamp-2">
                                                     {item.product?.description}
                                                 </p>

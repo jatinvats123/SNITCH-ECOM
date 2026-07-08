@@ -2,6 +2,22 @@ import cartModel from "../models/cartModel.js";
 import productModel from "../models/productModel.js";
 import { stockOfVariant } from "../dao/product.dao.js";
 
+const buildVariantSnapshot = (product, variant) => {
+    const attributes = variant.attributes || {};
+    const label = Object.entries(attributes)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(" / ");
+
+    return {
+        label: label || product.title,
+        images: variant.images || [],
+        attributes,
+        price: variant.price,
+    };
+};
+
+const getVariantMatchValue = (variant) => variant?.variantId?.toString() || variant?._id?.toString() || null;
+
 export async function addToCart(req,res){
     try {
         const {productId}=req.params;
@@ -18,7 +34,7 @@ export async function addToCart(req,res){
         // If variantId is provided, check if variant exists
         let price = product.price;
         if(variantId) {
-            const variant = product.variants.find(v => v._id.toString() === variantId);
+            const variant = product.variants.find(v => v._id.toString() === variantId || v.variantId?.toString() === variantId);
             if(!variant) {
                 return res.status(404).json({
                     message:"Variant not found",
@@ -30,7 +46,11 @@ export async function addToCart(req,res){
 
         const cart= await cartModel.findOne({user:req.user._id})||(await cartModel.create({user:req.user._id,}))
 
-        const isProductAlreadyInCart = cart.items.some(item=>item.product.toString()===productId && item.variant?.toString()===variantId);
+        const isProductAlreadyInCart = cart.items.some(item=>{
+            const itemVariantId = item.variant?.toString();
+            const requestedVariantId = variantId || null;
+            return item.product.toString()===productId && itemVariantId === requestedVariantId;
+        });
         if(isProductAlreadyInCart){
             const quantityInCart = cart.items.find(item=>item.product.toString()===productId && item.variant?.toString()===variantId).quantity;
             
@@ -39,7 +59,17 @@ export async function addToCart(req,res){
                 { $inc: { "items.$.quantity": quantity } }
             )
         } else {
-            cart.items.push({product: productId, variant: variantId, quantity, price})
+            const variant = variantId
+                ? product.variants.find(v => v._id.toString() === variantId || v.variantId?.toString() === variantId)
+                : null;
+
+            cart.items.push({
+                product: productId,
+                variant: variant?._id || variantId,
+                quantity,
+                price,
+                ...(variant ? { variantSnapshot: buildVariantSnapshot(product, variant) } : {})
+            })
             await cart.save()
         }
         
@@ -111,6 +141,56 @@ export async function incrementCartItemQuantity(req,res){
             message: error.message || "Error incrementing cart item quantity",
             success: false
         })  
+    }
+}
+
+export async function decrementCartItemQuantity(req, res) {
+    try {
+        const { productId, variantId } = req.params;
+        const user = req.user;
+        const cart = await cartModel.findOne({ user: user._id });
+
+        if (!cart) {
+            return res.status(404).json({
+                message: "Cart not found",
+                success: false,
+            });
+        }
+
+        const itemIndex = cart.items.findIndex(
+            item => item.product.toString() === productId && item.variant?.toString() === variantId
+        );
+
+        if (itemIndex === -1) {
+            return res.status(404).json({
+                message: "Item not found in cart",
+                success: false,
+            });
+        }
+
+        if (cart.items[itemIndex].quantity <= 1) {
+            cart.items.splice(itemIndex, 1);
+        } else {
+            cart.items[itemIndex].quantity -= 1;
+        }
+
+        await cart.save();
+
+        const updatedCart = await cartModel.findById(cart._id)
+            .populate("items.product")
+            .populate("items.variant");
+
+        return res.status(200).json({
+            message: "Item quantity decremented successfully",
+            success: true,
+            cart: updatedCart,
+        });
+    } catch (error) {
+        console.error("Error decrementing cart item quantity:", error);
+        return res.status(500).json({
+            message: error.message || "Error decrementing cart item quantity",
+            success: false,
+        });
     }
 }
 

@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticateSeller } from '../middleware/auth.middleware.js';
-import { createProduct, addProductVariant, deleteVariant } from '../controller/product.controller.js';
+import { createProduct, addProductVariant, deleteVariant, deleteProduct } from '../controller/product.controller.js';
 import { createProductValidator, createVariantValidator } from '../validator/product.validator.js';
 import { getSellerProducts } from '../controller/product.controller.js';
 import { getAllProducts } from '../controller/product.controller.js';
@@ -37,6 +37,11 @@ router.get("/",getAllProducts)
 // desc Get product details by ID
 // access Public
 router.get("/detail/:productId",getProductDetail)
+
+// @route DELETE /api/products/:productId
+// @desc Delete a product listing
+// @access Private (sellers only)
+router.delete("/:productId", authenticateSeller, deleteProduct)
 
 
 

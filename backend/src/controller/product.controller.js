@@ -66,6 +66,43 @@ export async function getProductDetail(req,res){
   })
 }
 
+export async function deleteProduct(req, res) {
+  try {
+    const { productId } = req.params;
+    const seller = req.user;
+
+    const product = await productModel.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found",
+        success: false,
+      });
+    }
+
+    const productSellerId = String(product.seller?._id ?? product.seller);
+    const currentSellerId = String(seller?._id ?? seller);
+    if (productSellerId !== currentSellerId) {
+      return res.status(403).json({
+        message: "You are not authorized to delete this product",
+        success: false,
+      });
+    }
+
+    await productModel.findByIdAndDelete(productId);
+
+    res.status(200).json({
+      message: "Product deleted successfully",
+      success: true,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error deleting product",
+      success: false,
+      error: error.message,
+    });
+  }
+}
+
 export async function addProductVariant(req,res){
 
   try{
