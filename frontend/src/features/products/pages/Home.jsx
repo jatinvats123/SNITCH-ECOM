@@ -1,17 +1,57 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { useProduct } from '../hooks/useProduct';
 import Navbar from '../../../components/Navbar';
 
 const HERO_VIDEO_TRIM_END = 1; // seconds trimmed off the tail for a seamless loop
+const SEARCH_DEBOUNCE_MS = 400;
 
 const Home = () => {
     const products = useSelector((state) => state.product.products);
     const navigate = useNavigate();
-    const { handleGetAllProducts } = useProduct();
+    const location = useLocation();
+    const { handleGetAllProducts, handleLoadMoreProducts } = useProduct();
     const [liveTime, setLiveTime] = useState(() => new Date());
     const heroVideoRef = useRef(null);
+    const searchInputRef = useRef(null);
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
+    const [sort, setSort] = useState('newest');
+    const [page, setPage] = useState(1);
+    const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
+    const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const isFirstRun = useRef(true);
+
+    const activeFilters = {
+        q: searchTerm.trim() || undefined,
+        minPrice: minPrice || undefined,
+        maxPrice: maxPrice || undefined,
+        sort,
+    };
+    const hasActiveFilters = Boolean(searchTerm || minPrice || maxPrice || sort !== 'newest');
+
+    const handleClearFilters = () => {
+        setSearchTerm('');
+        setMinPrice('');
+        setMaxPrice('');
+        setSort('newest');
+    };
+
+    const handleLoadMore = async () => {
+        const nextPage = page + 1;
+        setIsLoadingMore(true);
+        try {
+            const data = await handleLoadMoreProducts({ ...activeFilters, page: nextPage });
+            setPagination(data.pagination);
+            setPage(nextPage);
+        } finally {
+            setIsLoadingMore(false);
+        }
+    };
 
     const dateFormatter = new Intl.DateTimeFormat('en-US', {
         timeZone: 'Asia/Kolkata',
@@ -29,8 +69,36 @@ const Home = () => {
     });
 
     useEffect(() => {
-        handleGetAllProducts();
-    }, []);
+        const fetchProducts = () => {
+            setIsLoading(true);
+            handleGetAllProducts({ ...activeFilters, page: 1 })
+                .then((data) => {
+                    setPagination(data.pagination);
+                    setPage(1);
+                })
+                .finally(() => setIsLoading(false));
+        };
+
+        if (isFirstRun.current) {
+            isFirstRun.current = false;
+            fetchProducts();
+            return;
+        }
+
+        const timeoutId = setTimeout(fetchProducts, SEARCH_DEBOUNCE_MS);
+        return () => clearTimeout(timeoutId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchTerm, minPrice, maxPrice, sort]);
+
+    useEffect(() => {
+        if (!location.state?.focusSearch) return;
+
+        const timeoutId = setTimeout(() => {
+            searchInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+            searchInputRef.current?.focus();
+        }, 100);
+        return () => clearTimeout(timeoutId);
+    }, [location.state]);
 
     useEffect(() => {
         const intervalId = window.setInterval(() => {
@@ -108,9 +176,9 @@ const Home = () => {
             <main className="max-w-screen-xl mx-auto px-6 sm:px-10 lg:px-16 pt-24 pb-36">
 
                 {/* Section header */}
-                <div className="mb-20">
+                <div className="mb-14">
                     <p className="text-[10px] uppercase tracking-[0.4em] text-black/30 mb-6">
-                        New Arrivals
+                        {hasActiveFilters ? 'Search' : 'New Arrivals'}
                     </p>
                     <div className="flex items-end justify-between gap-6">
                         <h2 className="text-3xl sm:text-4xl font-light text-black leading-snug">
@@ -123,11 +191,85 @@ const Home = () => {
                     </div>
                 </div>
 
+                {/* Search & filters */}
+                <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="w-full sm:max-w-sm">
+                        <input
+                            ref={searchInputRef}
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Search the collection…"
+                            className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
+                        />
+                    </div>
+
+                    <div className="flex flex-wrap items-end gap-5">
+                        <div>
+                            <label className="mb-1 block text-[10px] uppercase tracking-[0.25em] text-black/40">Min ₹</label>
+                            <input
+                                type="number"
+                                min="0"
+                                value={minPrice}
+                                onChange={(e) => setMinPrice(e.target.value)}
+                                placeholder="0"
+                                className="w-20 border-0 border-b border-black/15 bg-transparent py-2 text-sm text-black placeholder:text-black/30 focus:border-black focus:outline-none focus:ring-0"
+                            />
+                        </div>
+                        <div>
+                            <label className="mb-1 block text-[10px] uppercase tracking-[0.25em] text-black/40">Max ₹</label>
+                            <input
+                                type="number"
+                                min="0"
+                                value={maxPrice}
+                                onChange={(e) => setMaxPrice(e.target.value)}
+                                placeholder="Any"
+                                className="w-20 border-0 border-b border-black/15 bg-transparent py-2 text-sm text-black placeholder:text-black/30 focus:border-black focus:outline-none focus:ring-0"
+                            />
+                        </div>
+                        <div>
+                            <label className="mb-1 block text-[10px] uppercase tracking-[0.25em] text-black/40">Sort</label>
+                            <select
+                                value={sort}
+                                onChange={(e) => setSort(e.target.value)}
+                                className="border-0 border-b border-black/15 bg-transparent py-2 text-sm text-black focus:border-black focus:outline-none focus:ring-0"
+                            >
+                                <option value="newest">Newest</option>
+                                <option value="price_asc">Price: Low to High</option>
+                                <option value="price_desc">Price: High to Low</option>
+                            </select>
+                        </div>
+                        {hasActiveFilters && (
+                            <button
+                                type="button"
+                                onClick={handleClearFilters}
+                                className="pb-2 text-[11px] uppercase tracking-[0.25em] text-black/40 underline-offset-4 transition-colors hover:text-black hover:underline"
+                            >
+                                Clear
+                            </button>
+                        )}
+                    </div>
+                </div>
+
                 {/* Rule */}
-                <div className="w-full h-px bg-black/8 mb-16" />
+                <div className="w-full h-px bg-black/8 mb-10" />
+
+                {!isLoading && (
+                    <p className="mb-10 text-xs uppercase tracking-[0.25em] text-black/40">
+                        {pagination.total} {pagination.total === 1 ? 'piece' : 'pieces'}
+                        {searchTerm ? ` for "${searchTerm}"` : ''}
+                    </p>
+                )}
 
                 {/* Grid */}
-                {products && products.length > 0 ? (
+                {isLoading ? (
+                    <div className="flex flex-col items-center justify-center py-40 gap-6">
+                        <div className="w-8 h-8 rounded-full border border-black/15 border-t-black/50 animate-spin" />
+                        <p className="text-[10px] uppercase tracking-[0.35em] text-black/30">
+                            Loading collection…
+                        </p>
+                    </div>
+                ) : products && products.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-20">
                         {products.map((product) => (
                             <div
@@ -172,11 +314,34 @@ const Home = () => {
                         ))}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-40 gap-6">
-                        <div className="w-8 h-8 rounded-full border border-black/15 border-t-black/50 animate-spin" />
-                        <p className="text-[10px] uppercase tracking-[0.35em] text-black/30">
-                            Loading collection…
+                    <div className="flex flex-col items-center justify-center gap-4 py-40 text-center">
+                        <p className="text-[10px] uppercase tracking-[0.35em] text-black/30">No Results</p>
+                        <h3 className="text-2xl font-light text-black">Nothing matches your search</h3>
+                        <p className="max-w-sm text-sm text-black/45 leading-relaxed">
+                            Try a different keyword or clear your filters to see the full collection.
                         </p>
+                        {hasActiveFilters && (
+                            <button
+                                type="button"
+                                onClick={handleClearFilters}
+                                className="mt-2 px-6 py-2.5 border border-black text-[11px] uppercase tracking-[0.3em] hover:bg-black hover:text-white transition-all duration-300"
+                            >
+                                Clear Filters
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {!isLoading && products.length > 0 && page < pagination.pages && (
+                    <div className="mt-20 flex justify-center">
+                        <button
+                            type="button"
+                            onClick={handleLoadMore}
+                            disabled={isLoadingMore}
+                            className="px-8 py-3 border border-black text-[11px] uppercase tracking-[0.35em] hover:bg-black hover:text-white transition-all duration-300 disabled:opacity-50"
+                        >
+                            {isLoadingMore ? 'Loading…' : 'Load More'}
+                        </button>
                     </div>
                 )}
             </main>

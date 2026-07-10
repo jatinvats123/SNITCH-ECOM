@@ -14,6 +14,8 @@ const navigate = useNavigate();
     password: '',
     isSeller: false,
   });
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -25,15 +27,22 @@ const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await handleRegister({
-      email:formData.email,
-      contact:formData.contactNumber,
-      password:formData.password,
-      fullname:formData.fullName,
-      isSeller:formData.isSeller,
-    })
-    navigate("/");
-    // Add registration logic here
+    setError('');
+    setIsSubmitting(true);
+    try {
+      await handleRegister({
+        email:formData.email,
+        contact:formData.contactNumber,
+        password:formData.password,
+        fullname:formData.fullName,
+        isSeller:formData.isSeller,
+      })
+      navigate("/");
+    } catch (err) {
+      setError(err?.response?.data?.message || "Registration failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -133,11 +142,14 @@ const navigate = useNavigate();
             </div>
           </div>
 
+          {error && <p className="text-sm text-red-600">{error}</p>}
+
           <button
             type="submit"
-            className="group w-full border border-black bg-black py-4 text-[11px] font-medium uppercase tracking-[0.35em] text-white transition-all duration-300 hover:bg-white hover:text-black"
+            disabled={isSubmitting}
+            className="group w-full border border-black bg-black py-4 text-[11px] font-medium uppercase tracking-[0.35em] text-white transition-all duration-300 hover:bg-white hover:text-black disabled:opacity-50"
           >
-            Create Account
+            {isSubmitting ? "Creating Account..." : "Create Account"}
           </button>
 
           <ContinueWithGoogle />

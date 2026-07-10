@@ -17,9 +17,9 @@ export async function getSellerProducts()
     return response.data;
 }
 
-export async function getAllProducts()
+export async function getAllProducts(filters = {})
 {
-    const response = await productApiInstance.get("/")
+    const response = await productApiInstance.get("/", { params: filters })
     return response.data;
 }
 

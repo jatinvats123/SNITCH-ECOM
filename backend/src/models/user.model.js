@@ -18,6 +18,8 @@ const userSchema = new mongoose.Schema({
         default:"buyer"
     },
     googleId:{type:String, required:false},
+    resetPasswordToken:{type:String, required:false},
+    resetPasswordExpires:{type:Date, required:false},
 })
 
 userSchema.pre("save", async function(){

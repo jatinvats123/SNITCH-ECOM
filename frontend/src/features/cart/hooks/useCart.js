@@ -1,14 +1,15 @@
 import { addItem,getCart, incrementCartItemQuantity, decrementCartItemQuantity, removeItem } from "../service/cart.api";
 import { useDispatch } from "react-redux";
-import { addItem as addItemToCart, setItems } from "../state/cart.slice";
+import { setItems } from "../state/cart.slice";
 
 export const useCart = () =>{
     const dispatch = useDispatch();
 
     async function handleAddToCart(productId, variantId) {
         try {
-            const cartItem = await addItem(productId, variantId);
-            dispatch(addItemToCart(cartItem));
+            const data = await addItem(productId, variantId);
+            dispatch(setItems(data.cart.items));
+            return data;
         } catch (error) {
             console.error("Error adding item to cart:", error);
         }
@@ -19,8 +20,12 @@ export const useCart = () =>{
 
 
     async function handleGetCart(){
-        const data = await getCart();
-        dispatch(setItems(data.cart.items));
+        try {
+            const data = await getCart();
+            dispatch(setItems(data.cart.items));
+        } catch (error) {
+            console.error("Error fetching cart:", error);
+        }
     }
 
     async function handleIncrementCartItemQuantity(productId, variantId){

@@ -1,11 +1,33 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
-import { useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router";
+import { useSelector, useDispatch } from "react-redux";
+import { useCart } from "../features/cart/hooks/useCart";
+import { useAuth } from "../features/auth/hook/useAuth";
+import { setItems } from "../features/cart/state/cart.slice";
 
 const Navbar = ({ variant = "dark", animatedBrand = false }) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isLight = variant === "light";
   const user = useSelector((state) => state.auth.user);
+  const cartItems = useSelector((state) => state.cart.items);
+  const { handleGetCart } = useCart();
+  const { handleLogout } = useAuth();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const cartCount = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
+
+  const handleLogoutClick = async () => {
+    await handleLogout();
+    dispatch(setItems([]));
+    setIsMenuOpen(false);
+    navigate("/");
+  };
+
+  const handleSearchClick = () => {
+    setIsMenuOpen(false);
+    navigate("/", { state: { focusSearch: true, ts: Date.now() } });
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,7 +40,27 @@ const Navbar = ({ variant = "dark", animatedBrand = false }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (user) handleGetCart();
+  }, [user]);
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setIsMenuOpen(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [isMenuOpen]);
+
   return (
+    <>
     <header
       className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
         isLight
@@ -33,17 +75,31 @@ const Navbar = ({ variant = "dark", animatedBrand = false }) => {
       <div className="mx-auto flex h-16 items-center justify-between px-5 sm:h-18 sm:px-8 lg:px-10">
         <button
           type="button"
-          aria-label="Open menu"
-          className={`group inline-flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 ${
+          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={isMenuOpen}
+          onClick={() => setIsMenuOpen((open) => !open)}
+          className={`group relative z-[60] inline-flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 ${
             isLight
               ? "text-black/80"
               : "text-white/90"
           }`}
         >
           <span className="flex flex-col gap-1.5">
-            <span className="block h-px w-4 bg-current transition-all duration-300 group-hover:w-5" />
-            <span className="block h-px w-5 bg-current transition-all duration-300 group-hover:w-4" />
-            <span className="block h-px w-3.5 bg-current transition-all duration-300 group-hover:w-4.5" />
+            <span
+              className={`block h-px w-4 bg-current transition-all duration-300 group-hover:w-5 ${
+                isMenuOpen ? "translate-y-[7px] w-5 rotate-45" : ""
+              }`}
+            />
+            <span
+              className={`block h-px w-5 bg-current transition-all duration-300 group-hover:w-4 ${
+                isMenuOpen ? "opacity-0" : ""
+              }`}
+            />
+            <span
+              className={`block h-px w-3.5 bg-current transition-all duration-300 group-hover:w-4.5 ${
+                isMenuOpen ? "-translate-y-[7px] w-5 -rotate-45" : ""
+              }`}
+            />
           </span>
         </button>
 
@@ -91,6 +147,22 @@ const Navbar = ({ variant = "dark", animatedBrand = false }) => {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleSearchClick}
+            aria-label="Search"
+            className={`group inline-flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 ${
+              isLight
+                ? "text-black/80 hover:bg-black/5"
+                : "text-white/90 hover:bg-white/10"
+            }`}
+          >
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8" />
+              <path d="M21 21l-4.3-4.3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+          </button>
+
           {user && (
             <Link
               to="/cart"
@@ -101,15 +173,42 @@ const Navbar = ({ variant = "dark", animatedBrand = false }) => {
                   : "text-white/90 hover:bg-white/10"
               }`}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M7 4V3C7 2.45 7.45 2 8 2H16C16.55 2 17 2.45 17 3V4H21C21.55 4 22 4.45 22 5C22 5.55 21.55 6 21 6H20.92L19.12 19.5C18.96 20.84 17.8 21.9 16.46 21.9H7.54C6.2 21.9 5.04 20.84 4.88 19.5L3.08 6H2C1.45 6 1 5.55 1 5C1 4.45 1.45 4 2 4H7ZM9 9C8.45 9 8 9.45 8 10V17C8 17.55 8.45 18 9 18C9.55 18 10 17.55 10 17V10C10 9.45 9.55 9 9 9ZM15 9C14.45 9 14 9.45 14 10V17C14 17.55 14.45 18 15 18C15.55 18 16 17.55 16 17V10C16 9.45 15.55 9 15 9Z" />
-              </svg>
+              <span className="relative inline-flex">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M7 4V3C7 2.45 7.45 2 8 2H16C16.55 2 17 2.45 17 3V4H21C21.55 4 22 4.45 22 5C22 5.55 21.55 6 21 6H20.92L19.12 19.5C18.96 20.84 17.8 21.9 16.46 21.9H7.54C6.2 21.9 5.04 20.84 4.88 19.5L3.08 6H2C1.45 6 1 5.55 1 5C1 4.45 1.45 4 2 4H7ZM9 9C8.45 9 8 9.45 8 10V17C8 17.55 8.45 18 9 18C9.55 18 10 17.55 10 17V10C10 9.45 9.55 9 9 9ZM15 9C14.45 9 14 9.45 14 10V17C14 17.55 14.45 18 15 18C15.55 18 16 17.55 16 17V10C16 9.45 15.55 9 15 9Z" />
+                </svg>
+                {cartCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-semibold leading-none text-white">
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </span>
+                )}
+              </span>
               <span className={`text-xs font-medium uppercase tracking-[0.2em] hidden sm:inline ${isLight ? "text-black" : "text-white"}`}>
                 {user.name || user.email?.split('@')[0]}
               </span>
             </Link>
           )}
 
+          {user && (
+            <button
+              type="button"
+              onClick={handleLogoutClick}
+              aria-label="Log out"
+              className={`group inline-flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 ${
+                isLight
+                  ? "text-black/80 hover:bg-black/5"
+                  : "text-white/90 hover:bg-white/10"
+              }`}
+            >
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M16 17l5-5-5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M21 12H9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            </button>
+          )}
+
+          {!user && (
           <Link
             to="/register"
             aria-label="Go to register"
@@ -133,9 +232,100 @@ const Navbar = ({ variant = "dark", animatedBrand = false }) => {
               />
             </svg>
           </Link>
+          )}
         </div>
       </div>
     </header>
+
+    <div
+      aria-hidden={!isMenuOpen}
+      onClick={() => setIsMenuOpen(false)}
+      className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
+        isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"
+      }`}
+    />
+
+    <nav
+        aria-hidden={!isMenuOpen}
+        className={`fixed top-0 left-0 z-50 flex h-full w-72 max-w-[80vw] flex-col gap-1 bg-[#0d0d0d] px-6 pt-20 pb-8 text-white shadow-2xl transition-transform duration-300 ${
+          isMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <Link
+          to="/"
+          onClick={() => setIsMenuOpen(false)}
+          className="rounded-lg px-3 py-3 text-sm font-medium uppercase tracking-[0.2em] text-white/90 transition-colors hover:bg-white/10"
+        >
+          Home
+        </Link>
+
+        <button
+          type="button"
+          onClick={handleSearchClick}
+          className="rounded-lg px-3 py-3 text-left text-sm font-medium uppercase tracking-[0.2em] text-white/90 transition-colors hover:bg-white/10"
+        >
+          Search
+        </button>
+
+        {user && (
+          <Link
+            to="/cart"
+            onClick={() => setIsMenuOpen(false)}
+            className="rounded-lg px-3 py-3 text-sm font-medium uppercase tracking-[0.2em] text-white/90 transition-colors hover:bg-white/10"
+          >
+            Cart
+          </Link>
+        )}
+
+        {user?.role === "seller" && (
+          <>
+            <Link
+              to="/seller/dashboard"
+              onClick={() => setIsMenuOpen(false)}
+              className="rounded-lg px-3 py-3 text-sm font-medium uppercase tracking-[0.2em] text-white/90 transition-colors hover:bg-white/10"
+            >
+              Dashboard
+            </Link>
+            <Link
+              to="/seller/create-product"
+              onClick={() => setIsMenuOpen(false)}
+              className="rounded-lg px-3 py-3 text-sm font-medium uppercase tracking-[0.2em] text-white/90 transition-colors hover:bg-white/10"
+            >
+              Create Product
+            </Link>
+          </>
+        )}
+
+        {!user && (
+          <>
+            <Link
+              to="/login"
+              onClick={() => setIsMenuOpen(false)}
+              className="rounded-lg px-3 py-3 text-sm font-medium uppercase tracking-[0.2em] text-white/90 transition-colors hover:bg-white/10"
+            >
+              Login
+            </Link>
+            <Link
+              to="/register"
+              onClick={() => setIsMenuOpen(false)}
+              className="rounded-lg px-3 py-3 text-sm font-medium uppercase tracking-[0.2em] text-white/90 transition-colors hover:bg-white/10"
+            >
+              Register
+            </Link>
+          </>
+        )}
+
+        {user && (
+          <button
+            type="button"
+            onClick={handleLogoutClick}
+            className="rounded-lg px-3 py-3 text-left text-sm font-medium uppercase tracking-[0.2em] text-white/90 transition-colors hover:bg-white/10"
+          >
+            Logout
+          </button>
+        )}
+    </nav>
+    </>
   );
 };
 

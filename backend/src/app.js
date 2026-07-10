@@ -14,7 +14,7 @@ import cartModel from "./models/cartModel.js";
 const app = express();
 
 app.use(cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: config.CLIENT_URL,
     credentials: true,
 }));
 

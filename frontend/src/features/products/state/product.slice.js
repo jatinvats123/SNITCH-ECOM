@@ -13,8 +13,11 @@ const productSlice = createSlice({
         },
         setProducts:(state,action)=>{
             state.products = action.payload;
+        },
+        appendProducts:(state,action)=>{
+            state.products = state.products.concat(action.payload);
         }
     }
 })
-export const {setSellerProducts,setProducts} = productSlice.actions;
+export const {setSellerProducts,setProducts,appendProducts} = productSlice.actions;
 export default productSlice.reducer;

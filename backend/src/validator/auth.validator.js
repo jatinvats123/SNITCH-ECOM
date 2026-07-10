@@ -44,6 +44,24 @@ export const validateLoginUser = [
   body("password")
     .isString()
     .withMessage("Password must be string"),
-    
+
+  validateRequest
+];
+
+export const validateForgotPassword = [
+  body("email")
+    .isEmail()
+    .withMessage("Invalid email"),
+
+  validateRequest
+];
+
+export const validateResetPassword = [
+  body("password")
+    .isString()
+    .withMessage("Password must be string")
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters"),
+
   validateRequest
 ];

@@ -11,6 +11,8 @@ const Login = () => {
     email: '',
     password: '',
   });
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,16 +24,23 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const loggedInUser = await handleLogin({
-      email: formData.email,
-      password: formData.password,
-    });
-    if (loggedInUser?.role === "buyer") {
-      navigate("/");
-    } else if (loggedInUser?.role === "seller") {
-      navigate("/seller/dashboard");
+    setError('');
+    setIsSubmitting(true);
+    try {
+      const loggedInUser = await handleLogin({
+        email: formData.email,
+        password: formData.password,
+      });
+      if (loggedInUser?.role === "buyer") {
+        navigate("/");
+      } else if (loggedInUser?.role === "seller") {
+        navigate("/seller/dashboard");
+      }
+    } catch (err) {
+      setError(err?.response?.data?.message || "Login failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-    
   };
 
   return (
@@ -72,9 +81,9 @@ const Login = () => {
               <label className="block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="password">
                 Password
               </label>
-              <a href="#" className="text-[11px] uppercase tracking-[0.22em] text-black/40 transition-all hover:text-black">
+              <Link to="/forgot-password" className="text-[11px] uppercase tracking-[0.22em] text-black/40 transition-all hover:text-black">
                 Forgot your password?
-              </a>
+              </Link>
             </div>
             <input
               type="password"
@@ -88,11 +97,14 @@ const Login = () => {
             />
           </div>
 
+          {error && <p className="text-sm text-red-600">{error}</p>}
+
           <button
             type="submit"
-            className="mt-4 w-full border border-black bg-black py-4 text-[11px] font-medium uppercase tracking-[0.35em] text-white transition-all duration-300 hover:bg-white hover:text-black"
+            disabled={isSubmitting}
+            className="mt-4 w-full border border-black bg-black py-4 text-[11px] font-medium uppercase tracking-[0.35em] text-white transition-all duration-300 hover:bg-white hover:text-black disabled:opacity-50"
           >
-            Log In
+            {isSubmitting ? "Logging In..." : "Log In"}
           </button>
           <ContinueWithGoogle />
         </form>

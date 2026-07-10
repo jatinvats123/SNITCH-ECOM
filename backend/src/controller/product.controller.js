@@ -42,12 +42,48 @@ export async function getSellerProducts(req,res){
   });
 }
 
+const SORT_OPTIONS = {
+  price_asc: { "price.amount": 1 },
+  price_desc: { "price.amount": -1 },
+  newest: { createdAt: -1 },
+};
+
 export async function getAllProducts(req,res){
-  const products = await productModel.find()
+  const { q, minPrice, maxPrice, sort, page = 1, limit = 12 } = req.query;
+
+  const filter = {};
+  if (q) {
+    const regex = new RegExp(q.trim(), "i");
+    filter.$or = [{ title: regex }, { description: regex }];
+  }
+  if (minPrice || maxPrice) {
+    filter["price.amount"] = {};
+    if (minPrice) filter["price.amount"].$gte = Number(minPrice);
+    if (maxPrice) filter["price.amount"].$lte = Number(maxPrice);
+  }
+
+  const sortOption = SORT_OPTIONS[sort] || SORT_OPTIONS.newest;
+  const pageNum = Math.max(1, Number(page) || 1);
+  const limitNum = Math.max(1, Number(limit) || 12);
+
+  const [products, total] = await Promise.all([
+    productModel.find(filter)
+      .sort(sortOption)
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum),
+    productModel.countDocuments(filter),
+  ]);
+
   res.status(200).json({
     message: "Products fetched successfully",
     success: true,
     products,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total,
+      pages: Math.max(1, Math.ceil(total / limitNum)),
+    },
   });
 }
 export async function getProductDetail(req,res){
