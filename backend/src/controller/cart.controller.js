@@ -3,7 +3,9 @@ import productModel from "../models/productModel.js";
 import { stockOfVariant } from "../dao/product.dao.js";
 
 const buildVariantSnapshot = (product, variant) => {
-    const attributes = variant.attributes || {};
+    const attributes = variant.attributes instanceof Map
+        ? Object.fromEntries(variant.attributes.entries())
+        : (variant.attributes || {});
     const label = Object.entries(attributes)
         .map(([key, value]) => `${key}: ${value}`)
         .join(" / ");
@@ -17,6 +19,7 @@ const buildVariantSnapshot = (product, variant) => {
 };
 
 const getVariantMatchValue = (variant) => variant?.variantId?.toString() || variant?._id?.toString() || null;
+const getItemVariantMatchValue = (item) => item?.variantKey?.toString() || item?.variant?.toString() || null;
 
 export async function addToCart(req,res){
     try {
@@ -46,26 +49,27 @@ export async function addToCart(req,res){
 
         const cart= await cartModel.findOne({user:req.user._id})||(await cartModel.create({user:req.user._id,}))
 
-        const isProductAlreadyInCart = cart.items.some(item=>{
-            const itemVariantId = item.variant?.toString();
-            const requestedVariantId = variantId || null;
-            return item.product.toString()===productId && itemVariantId === requestedVariantId;
+        const requestedVariantId = variantId || null;
+        const isProductAlreadyInCart = cart.items.some(item => {
+            return item.product.toString() === productId && getItemVariantMatchValue(item) === requestedVariantId;
         });
         if(isProductAlreadyInCart){
-            const quantityInCart = cart.items.find(item=>item.product.toString()===productId && item.variant?.toString()===variantId).quantity;
+            const quantityInCart = cart.items.find(item => item.product.toString() === productId && getItemVariantMatchValue(item) === requestedVariantId)?.quantity;
             
             await cartModel.findOneAndUpdate(
-                {user: req.user._id,"items.product": productId, "items.variant": variantId},
+                {user: req.user._id,"items.product": productId, "items.variantKey": requestedVariantId},
                 { $inc: { "items.$.quantity": quantity } }
             )
         } else {
             const variant = variantId
                 ? product.variants.find(v => v._id.toString() === variantId || v.variantId?.toString() === variantId)
                 : null;
+            const variantKey = variant ? getVariantMatchValue(variant) : null;
 
             cart.items.push({
                 product: productId,
                 variant: variant?._id || variantId,
+                variantKey,
                 quantity,
                 price,
                 ...(variant ? { variantSnapshot: buildVariantSnapshot(product, variant) } : {})
@@ -122,7 +126,7 @@ export async function incrementCartItemQuantity(req,res){
                 success:false
             })
         }
-        const item = cart.items.find(i=>i.product.toString()===productId && i.variant?.toString()===variantId);
+        const item = cart.items.find(i=>i.product.toString()===productId && getItemVariantMatchValue(i)===variantId);
         if(!item){
             return res.status(404).json({
                 message:"Item not found in cart",
@@ -158,7 +162,7 @@ export async function decrementCartItemQuantity(req, res) {
         }
 
         const itemIndex = cart.items.findIndex(
-            item => item.product.toString() === productId && item.variant?.toString() === variantId
+            item => item.product.toString() === productId && getItemVariantMatchValue(item) === variantId
         );
 
         if (itemIndex === -1) {
@@ -208,7 +212,7 @@ export async function removeCartItem(req, res) {
         }
 
         const pullCriteria = variantId
-            ? { product: productId, variant: variantId }
+            ? { product: productId, variantKey: variantId }
             : { product: productId, $or: [{ variant: { $exists: false } }, { variant: null }] };
 
         const updatedCart = await cartModel.findByIdAndUpdate(

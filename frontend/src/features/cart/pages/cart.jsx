@@ -56,7 +56,10 @@ const Cart = () => {
     };
 
     const getVariantLabel = (item) => {
-        const variantAttributes = item.variant?.attributes || item.variantSnapshot?.attributes;
+        const rawAttributes = item.variant?.attributes || item.variantSnapshot?.attributes;
+        const variantAttributes = rawAttributes instanceof Map
+            ? Object.fromEntries(rawAttributes.entries())
+            : rawAttributes;
         const labelFromAttributes = variantAttributes
             ? Object.entries(variantAttributes)
                 .map(([key, value]) => `${key}: ${value}`)
@@ -70,6 +73,8 @@ const Cart = () => {
         item.variant?.images?.[0]?.url ||
         item.variantSnapshot?.images?.[0]?.url ||
         item.product?.images?.[0]?.url;
+
+    const getItemVariantKey = (item) => item.variantKey || item.variant?.variantId || item.variant?.variantId?._id || item.variant?._id || item.variant;
 
     const calculateTotal = () => {
         return cartItems.reduce((total, item) => {
@@ -86,7 +91,7 @@ const Cart = () => {
     };
 
     const handleIncrement = (item) => {
-        const variantId = item.variant?._id || item.variant;
+        const variantId = getItemVariantKey(item);
         setQuantities((prev) => ({
             ...prev,
             [item._id]: (prev[item._id] || 1) + 1,
@@ -95,12 +100,12 @@ const Cart = () => {
     };
 
     const handleRemove = (item) => {
-        const variantId = item.variant?._id || item.variant;
+        const variantId = getItemVariantKey(item);
         handleRemoveCartItem(item.product._id, variantId);
     };
 
     const handleDecrement = async (item) => {
-        const variantId = item.variant?._id || item.variant;
+        const variantId = getItemVariantKey(item);
         const currentQuantity = quantities[item._id] || item.quantity || 1;
 
         if (currentQuantity <= 1) {

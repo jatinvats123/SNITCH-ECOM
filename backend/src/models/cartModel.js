@@ -8,6 +8,7 @@ const cartSchema = new mongoose.Schema({
         quantity: { type: Number, required: true, default: 1 },
         price: { type: priceSchema, required: true },
         variant: { type: mongoose.Schema.Types.ObjectId, ref: 'product' }
+        ,variantKey: { type: mongoose.Schema.Types.ObjectId }
         ,variantSnapshot: {
           label: { type: String },
           images: [

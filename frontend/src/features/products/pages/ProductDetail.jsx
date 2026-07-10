@@ -50,8 +50,12 @@ const ProductDetail = () => {
         const attrSet = new Map();
         if (product?.variants) {
             product.variants.forEach(variant => {
-                if (variant.attributes) {
-                    Object.entries(variant.attributes).forEach(([key, value]) => {
+                const attributes = variant.attributes instanceof Map
+                    ? Object.fromEntries(variant.attributes.entries())
+                    : variant.attributes;
+
+                if (attributes) {
+                    Object.entries(attributes).forEach(([key, value]) => {
                         if (!attrSet.has(key)) {
                             attrSet.set(key, []);
                         }
@@ -217,7 +221,12 @@ const ProductDetail = () => {
                                         {product.variants.map((variant, idx) => {
                                             const isSelected = selectedVariant?._id === variant._id;
                                             const variantImage = variant.images?.[0]?.url || product.images?.[0]?.url || 'https://placehold.co/100x100/f7f7f7/cccccc';
-                                            const variantAttrs = variant.attributes ? Object.entries(variant.attributes).map(([k, v]) => `${k}: ${v}`).join(' / ') : `Variant ${idx + 1}`;
+                                            const variantAttributes = variant.attributes instanceof Map
+                                                ? Object.fromEntries(variant.attributes.entries())
+                                                : variant.attributes;
+                                            const variantAttrs = variantAttributes
+                                                ? Object.entries(variantAttributes).map(([k, v]) => `${k}: ${v}`).join(' / ')
+                                                : `Variant ${idx + 1}`;
                                             
                                             return (
                                                 <button
@@ -276,7 +285,7 @@ const ProductDetail = () => {
 
                             {/* Add to Cart — secondary */}
                             <button
-                                onClick={() => handleAddToCart(product._id, selectedVariant?._id)}
+                                onClick={() => handleAddToCart(product._id, selectedVariant?.variantId || selectedVariant?._id)}
                                 id="add-to-cart-btn"
                                 type="button"
                                 className="group relative w-full overflow-hidden py-4 border border-black/15 text-black text-[11px] uppercase tracking-[0.35em] hover:border-black/50 hover:bg-black/3 active:scale-[0.99] transition-all duration-200"

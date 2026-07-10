@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { useProduct } from '../hooks/useProduct';
 import Navbar from '../../../components/Navbar';
+
+const HERO_VIDEO_TRIM_END = 1; // seconds trimmed off the tail for a seamless loop
 
 const Home = () => {
     const products = useSelector((state) => state.product.products);
     const navigate = useNavigate();
     const { handleGetAllProducts } = useProduct();
     const [liveTime, setLiveTime] = useState(() => new Date());
+    const heroVideoRef = useRef(null);
 
     const dateFormatter = new Intl.DateTimeFormat('en-US', {
         timeZone: 'Asia/Kolkata',
@@ -36,6 +39,21 @@ const Home = () => {
         return () => window.clearInterval(intervalId);
     }, []);
 
+    useEffect(() => {
+        const videoEl = heroVideoRef.current;
+        if (!videoEl) return;
+
+        const handleTimeUpdate = () => {
+            if (videoEl.duration && videoEl.currentTime >= videoEl.duration - HERO_VIDEO_TRIM_END) {
+                videoEl.currentTime = 0;
+                videoEl.play();
+            }
+        };
+
+        videoEl.addEventListener('timeupdate', handleTimeUpdate);
+        return () => videoEl.removeEventListener('timeupdate', handleTimeUpdate);
+    }, []);
+
     return (
         <div className="min-h-screen bg-white text-black selection:bg-black/10">
             <Navbar variant="light" animatedBrand />
@@ -43,19 +61,22 @@ const Home = () => {
             {/* ── Hero: Video ── */}
             <section className="relative h-[99.6vh] min-h-[560px] overflow-hidden bg-[#f7f7f5]">
                 <video
+                    ref={heroVideoRef}
                     autoPlay
-                    loop
                     muted
                     playsInline
                     poster="/register-bg.png"
-                    className="absolute inset-0 h-full w-full object-cover object-top opacity-70"
+                    className="absolute inset-0 h-full w-full object-cover object-top"
                 >
                     <source src="/avnique%20video%20for%20login%20page.mp4" type="video/mp4" />
                 </video>
 
                 {/* Soft dark overlay — just enough depth */}
-                <div className="absolute inset-0 bg-black/20" />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-white/75" />
+                <div className="absolute inset-0 bg-black/5" />
+                <div className="absolute inset-0 bg-linear-to-b from-black/5 via-transparent to-white/40" />
+
+                {/* Legibility scrim behind the headline only — keeps the rest of the video untouched */}
+                <div className="absolute inset-x-0 bottom-0 h-[45%] bg-linear-to-t from-black/55 via-black/15 to-transparent" />
 
                 {/* Live clock — top centre */}
                 <div className="absolute left-1/2 top-20 -translate-x-1/2 text-center sm:top-24">
@@ -72,9 +93,12 @@ const Home = () => {
                 {/* Hero copy — bottom left */}
                 <div className="absolute left-6 right-6 bottom-14 sm:left-10 sm:right-10 sm:bottom-20 lg:left-16 lg:right-16">
                     <div className="max-w-3xl">
-                        <h1 className="text-4xl font-light leading-tight text-[rgba(0,0,0,0.88)] sm:text-5xl md:text-6xl lg:text-7xl">
-                            Presence,<br />
-                            <span className="italic">tailored.</span>
+                        <h1
+                            className="text-4xl font-normal leading-tight text-[#f7f3ea] sm:text-5xl md:text-6xl lg:text-7xl"
+                            style={{ fontFamily: "'Playfair Display', serif" }}
+                        >
+                            Elegance,<br />
+                            <span className="italic font-light">unspoken.</span>
                         </h1>
                     </div>
                 </div>
