@@ -333,7 +333,7 @@ const Home = () => {
                     </div>
                 )}
 
-                {!isLoading && products.length > 0 && page < pagination.pages && (
+                {!isLoading && products?.length > 0 && page < pagination?.pages && (
                     <div className="mt-20 flex justify-center">
                         <button
                             type="button"

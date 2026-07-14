@@ -12,10 +12,13 @@ const productSlice = createSlice({
              state.sellerProducts = action.payload; 
         },
         setProducts:(state,action)=>{
-            state.products = action.payload;
+            // Coerce to an array so a failed/unexpected API response can never make
+            // `products` undefined (which would crash components that read .length/.map).
+            state.products = Array.isArray(action.payload) ? action.payload : [];
         },
         appendProducts:(state,action)=>{
-            state.products = state.products.concat(action.payload);
+            const incoming = Array.isArray(action.payload) ? action.payload : [];
+            state.products = (state.products || []).concat(incoming);
         }
     }
 })
