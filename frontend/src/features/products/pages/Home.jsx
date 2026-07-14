@@ -46,7 +46,7 @@ const Home = () => {
         setIsLoadingMore(true);
         try {
             const data = await handleLoadMoreProducts({ ...activeFilters, page: nextPage });
-            setPagination(data.pagination);
+            if (data?.pagination) setPagination(data.pagination);
             setPage(nextPage);
         } finally {
             setIsLoadingMore(false);
@@ -73,9 +73,10 @@ const Home = () => {
             setIsLoading(true);
             handleGetAllProducts({ ...activeFilters, page: 1 })
                 .then((data) => {
-                    setPagination(data.pagination);
+                    if (data?.pagination) setPagination(data.pagination);
                     setPage(1);
                 })
+                .catch((err) => console.error("Failed to load products:", err))
                 .finally(() => setIsLoading(false));
         };
 
@@ -256,7 +257,7 @@ const Home = () => {
 
                 {!isLoading && (
                     <p className="mb-10 text-xs uppercase tracking-[0.25em] text-black/40">
-                        {pagination.total} {pagination.total === 1 ? 'piece' : 'pieces'}
+                        {pagination?.total ?? 0} {pagination?.total === 1 ? 'piece' : 'pieces'}
                         {searchTerm ? ` for "${searchTerm}"` : ''}
                     </p>
                 )}
