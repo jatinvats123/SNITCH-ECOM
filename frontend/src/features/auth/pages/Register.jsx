@@ -39,7 +39,14 @@ const navigate = useNavigate();
       })
       navigate("/");
     } catch (err) {
-      setError(err?.response?.data?.message || "Registration failed. Please try again.");
+      const data = err?.response?.data;
+      // Backend returns either { message } (e.g. "User already exists") or
+      // express-validator's { errors: [{ msg }] } — surface whichever is present.
+      setError(
+        data?.message ||
+        data?.errors?.[0]?.msg ||
+        "Registration failed. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -88,7 +95,9 @@ const navigate = useNavigate();
               name="contactNumber"
               value={formData.contactNumber}
               onChange={handleChange}
-              placeholder="+1 (555) 000-0000"
+              placeholder="10-digit mobile number"
+              inputMode="numeric"
+              maxLength={10}
               required
               className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
             />

@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "../hook/useAuth";
 import { Link, useNavigate } from "react-router";
 import ContinueWithGoogle from "../components/ContinueWithGoogle";
 import Navbar from "../../../components/Navbar";
+import { setItems } from "../../cart/state/cart.slice";
 const Login = () => {
-  const { handleLogin } = useAuth();
+  const { handleLogin, handleLogout } = useAuth();
+  const user = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -13,6 +17,17 @@ const Login = () => {
   });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await handleLogout();
+      dispatch(setItems([]));
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,6 +57,44 @@ const Login = () => {
       setIsSubmitting(false);
     }
   };
+
+  // A signed-in user landing on /login sees a sign-out option instead of the form.
+  if (user) {
+    return (
+      <div className="min-h-screen bg-[#f5f5f3] text-black relative overflow-hidden font-sans">
+        <Navbar variant="light" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(0,0,0,0.04),transparent_42%)]" />
+
+        <main className="relative mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6 pb-16 pt-28 sm:pt-32">
+          <section className="w-full text-center" style={{ maxWidth: 420 }}>
+            <h1 className="text-2xl font-light uppercase tracking-[0.28em] text-black sm:text-3xl">
+              Already Signed In
+            </h1>
+            <p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-black/55">
+              You're signed in as <span className="text-black">{user.email || user.fullName}</span>.
+            </p>
+
+            <button
+              type="button"
+              onClick={handleSignOut}
+              disabled={isSigningOut}
+              className="mt-10 w-full border border-black bg-black py-4 text-[11px] font-medium uppercase tracking-[0.35em] text-white transition-all duration-300 hover:bg-white hover:text-black disabled:opacity-50"
+            >
+              {isSigningOut ? "Signing Out..." : "Sign Out"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="mt-4 w-full border border-black/15 py-4 text-[11px] font-medium uppercase tracking-[0.28em] text-black transition-all duration-300 hover:bg-black hover:text-white"
+            >
+              Continue Shopping
+            </button>
+          </section>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f5f5f3] text-black relative overflow-hidden font-sans">

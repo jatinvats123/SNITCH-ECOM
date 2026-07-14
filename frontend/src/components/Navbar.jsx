@@ -188,22 +188,17 @@ const Navbar = ({ variant = "dark", animatedBrand = false }) => {
           )}
 
           {user && (
-            <button
-              type="button"
-              onClick={handleLogoutClick}
-              aria-label="Log out"
+            <Link
+              to="/login"
+              aria-label="Account"
               className={`group inline-flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 ${
                 isLight
                   ? "text-black/80 hover:bg-black/5"
                   : "text-white/90 hover:bg-white/10"
               }`}
             >
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M16 17l5-5-5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M21 12H9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-              </svg>
-            </button>
+              <i className="bi bi-person text-xl leading-none" aria-hidden="true"></i>
+            </Link>
           )}
 
           {!user && (
