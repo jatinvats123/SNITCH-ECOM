@@ -3,41 +3,107 @@ import { useSelector } from 'react-redux';
 import { useCart } from '../hooks/useCart';
 import { useNavigate } from 'react-router';
 import Navbar from '../../../components/Navbar';
-import { useRazorpay } from "react-razorpay";
+import { createOrder, verifyPayment, notifyPaymentFailure } from '../service/payment.api';
+import { loadRazorpay } from '../service/loadRazorpay';
 const Cart = () => {
     const cartItems = useSelector((state) => state.cart.items);
+    const user = useSelector((state) => state.auth.user);
     const { handleGetCart, handleAddToCart, handleIncrementCartItemQuantity, handleDecrementCartItemQuantity, handleRemoveCartItem } = useCart();
     const navigate = useNavigate();
     const [quantities, setQuantities] = useState({});
-    const { error, isLoading, Razorpay } = useRazorpay();
+    const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
         handleGetCart();
     }, []);
-  const handlePayment = () => {
-    const options = {
-      key: "YOUR_RAZORPAY_KEY",
-      amount: 50000, // Amount in paise
-      currency: "INR",
-      name: "Test Company",
-      description: "Test Transaction",
-      order_id: "order_9A33XWu170gUtm", // Generate order_id on server
-      handler: (response) => {
-        console.log(response);
-        alert("Payment Successful!");
-      },
-      prefill: {
-        name: "John Doe",
-        email: "john.doe@example.com",
-        contact: "9999999999",
-      },
-      theme: {
-        color: "#F37254",
-      },
-    };
 
-    const razorpayInstance = new Razorpay(options);
-    razorpayInstance.open();
+  const handlePayment = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    try {
+      // 1. Create the order on the backend (amount is computed server-side from the cart).
+      const orderData = await createOrder();
+      if (!orderData?.success) {
+        alert(orderData?.message || "Unable to start checkout. Please try again.");
+        setIsProcessing(false);
+        return;
+      }
+
+      // 2. Open the Razorpay Checkout popup (Test Mode).
+      const options = {
+        key: orderData.key,
+        amount: orderData.amount, // in paise, from the server
+        currency: orderData.currency,
+        name: "AVENIQ",
+        description: "Order Payment",
+        order_id: orderData.razorpayOrderId, // generated on the server
+        handler: async (response) => {
+          // 3. Verify the payment signature on the backend.
+          try {
+            const result = await verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            if (result?.success) {
+              alert("Payment successful! Your order has been placed.");
+              await handleGetCart(); // refresh the cart (now empty)
+            } else {
+              alert(result?.message || "Payment verification failed. Please contact support.");
+            }
+          } catch (err) {
+            console.error("Verification error:", err);
+            alert("Payment verification failed. Please contact support.");
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          name: user?.fullName || "",
+          email: user?.email || "",
+          contact: user?.contact || "",
+        },
+        modal: {
+          // User closed/cancelled the popup without paying.
+          ondismiss: () => {
+            notifyPaymentFailure({
+              razorpay_order_id: orderData.razorpayOrderId,
+              reason: "Payment cancelled by user",
+            });
+            setIsProcessing(false);
+          },
+        },
+        theme: {
+          color: "#000000",
+        },
+      };
+
+      // Make sure Razorpay's Checkout script is loaded before opening the popup.
+      const RazorpayCheckout = await loadRazorpay();
+      const razorpayInstance = new RazorpayCheckout(options);
+
+      // Explicit payment failure reported by Razorpay.
+      razorpayInstance.on("payment.failed", (response) => {
+        console.error("Payment failed:", response.error);
+        notifyPaymentFailure({
+          razorpay_order_id: orderData.razorpayOrderId,
+          reason: response.error?.description,
+        });
+        alert("Payment failed. Please try again.");
+        setIsProcessing(false);
+      });
+
+      razorpayInstance.open();
+    } catch (error) {
+      // Surface the real reason (network error, blocked script, backend message, ...)
+      console.error("Checkout error:", error);
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong during checkout. Please try again.";
+      alert(message);
+      setIsProcessing(false);
+    }
   };
 
     useEffect(() => {
@@ -286,9 +352,10 @@ const Cart = () => {
                                 </div>
                             </div>
 
-                            <button className="w-full py-4 bg-black text-white text-[11px] font-medium uppercase tracking-[0.35em] hover:bg-black/90 transition-all duration-300 mb-4"
-                            onClick={handlePayment}>
-                                Proceed to Checkout
+                            <button className="w-full py-4 bg-black text-white text-[11px] font-medium uppercase tracking-[0.35em] hover:bg-black/90 transition-all duration-300 mb-4 disabled:opacity-60 disabled:cursor-not-allowed"
+                            onClick={handlePayment}
+                            disabled={isProcessing}>
+                                {isProcessing ? 'Processing…' : 'Proceed to Checkout'}
                             </button>
 
                             <button

@@ -174,9 +174,7 @@ const Navbar = ({ variant = "dark", animatedBrand = false }) => {
               }`}
             >
               <span className="relative inline-flex">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M7 4V3C7 2.45 7.45 2 8 2H16C16.55 2 17 2.45 17 3V4H21C21.55 4 22 4.45 22 5C22 5.55 21.55 6 21 6H20.92L19.12 19.5C18.96 20.84 17.8 21.9 16.46 21.9H7.54C6.2 21.9 5.04 20.84 4.88 19.5L3.08 6H2C1.45 6 1 5.55 1 5C1 4.45 1.45 4 2 4H7ZM9 9C8.45 9 8 9.45 8 10V17C8 17.55 8.45 18 9 18C9.55 18 10 17.55 10 17V10C10 9.45 9.55 9 9 9ZM15 9C14.45 9 14 9.45 14 10V17C14 17.55 14.45 18 15 18C15.55 18 16 17.55 16 17V10C16 9.45 15.55 9 15 9Z" />
-                </svg>
+                <i className="bi bi-cart text-xl leading-none" aria-hidden="true"></i>
                 {cartCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-semibold leading-none text-white">
                     {cartCount > 99 ? "99+" : cartCount}

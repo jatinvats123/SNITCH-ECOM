@@ -35,6 +35,12 @@ if (!process.env.EMAIL_FROM) {
 if (!process.env.CLIENT_URL) {
     throw new Error("CLIENT_URL is not defined in environment variables")
 }
+if (!process.env.RAZORPAY_KEY_ID) {
+    throw new Error("RAZORPAY_KEY_ID is not defined in environment variables")
+}
+if (!process.env.RAZORPAY_KEY_SECRET) {
+    throw new Error("RAZORPAY_KEY_SECRET is not defined in environment variables")
+}
 
 export const config = {
     MONGO_URI: process.env.MONGO_URI,
@@ -48,4 +54,12 @@ export const config = {
     SMTP_PASS: process.env.SMTP_PASS,
     EMAIL_FROM: process.env.EMAIL_FROM,
     CLIENT_URL: process.env.CLIENT_URL,
+    RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
+    RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
+    // "production" enables cross-site secure cookies. Defaults to development so local dev is unaffected.
+    NODE_ENV: process.env.NODE_ENV || "development",
+    // Absolute URL Google redirects back to after login. In production (frontend on Vercel
+    // proxying /api to the backend) set this to `${CLIENT_URL}/api/auth/google/callback`.
+    // Defaults to the relative path, which preserves the existing local-dev behaviour.
+    GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL || "/api/auth/google/callback",
 }

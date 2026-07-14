@@ -4,6 +4,21 @@ import crypto from "crypto";
 import { config } from "../config/config.js";
 import { sendResetPasswordEmail } from "../utils/mailer.js";
 
+const isProduction = config.NODE_ENV === "production";
+
+// Cookie options.
+// - httpOnly: JS can't read the token (mitigates XSS token theft).
+// - In production the frontend (Vercel) and backend (Render) are different hosts, so the
+//   auth cookie is sent cross-site: it must be `secure` + `sameSite: "none"`.
+// - In local dev over http we keep `sameSite: "lax"` and non-secure, otherwise the browser
+//   would refuse to store the cookie on localhost.
+const cookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+  maxAge: 100 * 24 * 60 * 60 * 1000, // 100 days, matches the JWT expiry
+};
+
 async function sendTokenResponse(user, res, message) {
   const token = jwt.sign(
     {
@@ -13,7 +28,7 @@ async function sendTokenResponse(user, res, message) {
     { expiresIn: "100d" }
   );
 
-  res.cookie("token", token);
+  res.cookie("token", token, cookieOptions);
 
   res.status(200).json({
     message,
@@ -86,8 +101,8 @@ export const googleCallBack = async (req, res) => {
     id: user._id,
   }, config.JWT_SECRET, {expiresIn:"100d"
   })
-  res.cookie("token", token);
-  res.redirect("http://localhost:5173/?google=success")
+  res.cookie("token", token, cookieOptions);
+  res.redirect(`${config.CLIENT_URL}/?google=success`)
 }
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
@@ -141,7 +156,12 @@ export const resetPassword = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-  res.clearCookie("token");
+  // clearCookie must use the same attributes the cookie was set with, or the browser keeps it.
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+  });
   res.status(200).json({ message: "Logged out successfully", success: true });
 };
 

@@ -8,10 +8,15 @@ import cartRouter from "./routes/cart.routes.js";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import {config} from "./config/config.js";
 import productRouter from "./routes/product.routes.js";
+import paymentRouter from "./routes/payment.routes.js";
 import userModel from "./models/user.model.js";
 import productModel from "./models/productModel.js";
 import cartModel from "./models/cartModel.js";
 const app = express();
+
+// Behind Render/Vercel the app runs behind a TLS-terminating proxy — trust it so
+// secure cookies and req.protocol/host are resolved from the forwarded headers.
+app.set("trust proxy", 1);
 
 app.use(cors({
     origin: config.CLIENT_URL,
@@ -30,7 +35,8 @@ app.use(passport.initialize());
 passport.use(new GoogleStrategy({
     clientID: config.GOOGLE_CLIENT_ID,
     clientSecret: config.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/api/auth/google/callback"},
+    callbackURL: config.GOOGLE_CALLBACK_URL,
+    proxy: true},
     (accessToken, refreshToken, profile, done) =>{
         return done(null, profile);
     }))
@@ -41,4 +47,5 @@ app.get("/", (_req, res) => {
 app.use("/api/auth",authRouter);
 app.use("/api/products", productRouter);
 app.use("/api/cart", cartRouter);
+app.use("/api/payment", paymentRouter);
 export default app;
