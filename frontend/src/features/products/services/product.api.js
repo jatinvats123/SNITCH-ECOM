@@ -6,7 +6,7 @@ const productApiInstance = axios.create({
 })
 // FUNCTION FOR CREATING PRODUCT
 export async function createProduct(formData){
-    const response = await productApiInstance.post("/", formData)
+    const response = await productApiInstance.post("", formData)
     return response.data;
 }
 
@@ -19,7 +19,7 @@ export async function getSellerProducts()
 
 export async function getAllProducts(filters = {})
 {
-    const response = await productApiInstance.get("/", { params: filters })
+    const response = await productApiInstance.get("", { params: filters })
     return response.data;
 }
 
