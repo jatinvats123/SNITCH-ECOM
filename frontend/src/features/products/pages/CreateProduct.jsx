@@ -74,7 +74,13 @@ const CreateProduct = () => {
       const response = await handleCreateProduct(payload);
       setSuccess(response?.message || 'Product created successfully.');
     } catch (err) {
-      setError(err?.response?.data?.message || 'Something went wrong. Please try again.');
+      const data = err?.response?.data;
+      // Backend returns { message } or express-validator's { errors: [{ msg }] }.
+      setError(
+        data?.message ||
+        data?.errors?.[0]?.msg ||
+        'Something went wrong. Please try again.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -228,6 +234,7 @@ const CreateProduct = () => {
                     onChange={handleChange}
                     placeholder="Describe the silhouette, material, and story behind this piece…"
                     rows={6}
+                    required
                     className={`${inputClassName} min-h-40 resize-none leading-relaxed`}
                   />
                 </div>
