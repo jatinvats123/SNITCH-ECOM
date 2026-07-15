@@ -8,7 +8,7 @@ export const useCart = () =>{
     async function handleAddToCart(productId, variantId) {
         try {
             const data = await addItem(productId, variantId);
-            dispatch(setItems(data.cart.items));
+            if (data?.cart?.items) dispatch(setItems(data.cart.items));
             return data;
         } catch (error) {
             console.error("Error adding item to cart:", error);
@@ -22,7 +22,7 @@ export const useCart = () =>{
     async function handleGetCart(){
         try {
             const data = await getCart();
-            dispatch(setItems(data.cart.items));
+            if (data?.cart?.items) dispatch(setItems(data.cart.items));
         } catch (error) {
             console.error("Error fetching cart:", error);
         }
@@ -40,7 +40,7 @@ export const useCart = () =>{
     async function handleDecrementCartItemQuantity(productId, variantId){
         try {
             const data = await decrementCartItemQuantity(productId, variantId);
-            dispatch(setItems(data.cart.items));
+            if (data?.cart?.items) dispatch(setItems(data.cart.items));
             return data;
         } catch (error) {
             console.error("Error decrementing cart item quantity:", error);
@@ -50,7 +50,7 @@ export const useCart = () =>{
     async function handleRemoveCartItem(productId, variantId) {
         try {
             const data = await removeItem(productId, variantId);
-            dispatch(setItems(data.cart.items));
+            if (data?.cart?.items) dispatch(setItems(data.cart.items));
             return data;
         } catch (error) {
             console.error("Error removing cart item:", error);
