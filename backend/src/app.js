@@ -11,6 +11,7 @@ import { config } from "./config/config.js";
 import logger from "./config/logger.js";
 import productRouter from "./routes/product.routes.js";
 import paymentRouter from "./routes/payment.routes.js";
+import { notFound, errorHandler } from "./middleware/error.middleware.js";
 const app = express();
 
 // Behind Render/Vercel the app runs behind a TLS-terminating proxy — trust it so
@@ -70,4 +71,10 @@ app.use("/api/auth", authRouter);
 app.use("/api/products", productRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/payment", paymentRouter);
+
+// 404 for anything unmatched, then the central error handler.
+// These two MUST remain the last middleware registered.
+app.use(notFound);
+app.use(errorHandler);
+
 export default app;
