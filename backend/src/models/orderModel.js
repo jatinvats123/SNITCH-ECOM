@@ -19,7 +19,7 @@ const orderItemSchema = new mongoose.Schema(
 
 const orderSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "user", required: true, index: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "user", required: true },
     items: { type: [orderItemSchema], required: true },
 
     // Monetary totals are stored in the smallest currency unit (paise for INR),
@@ -46,6 +46,11 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+// Buyer order history: list a user's orders newest-first (covers the match + sort).
+orderSchema.index({ user: 1, createdAt: -1 });
+// Seller order view: find orders that contain one of the seller's products.
+orderSchema.index({ "items.product": 1 });
 
 const orderModel = mongoose.model("order", orderSchema);
 

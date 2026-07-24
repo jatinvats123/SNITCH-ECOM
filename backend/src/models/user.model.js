@@ -30,6 +30,11 @@ userSchema.pre("save", async function () {
 userSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
+
+// Password-reset lookups query by the hashed reset token; sparse because almost
+// all users have no token set. (email already has a unique index from the field.)
+userSchema.index({ resetPasswordToken: 1 }, { sparse: true });
+
 const userModel = mongoose.model("user", userSchema);
 
 export default userModel;

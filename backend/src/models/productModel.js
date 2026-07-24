@@ -87,5 +87,13 @@ const productSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// Indexes for the fields the catalog and dashboard filter or sort on.
+// - Seller dashboard lists a seller's products, newest first.
+productSchema.index({ seller: 1, createdAt: -1 });
+// - Catalog price-range filter and price sort (getAllProducts).
+productSchema.index({ "price.amount": 1 });
+// - Default catalog sort is "newest".
+productSchema.index({ createdAt: -1 });
+
 const productModel = mongoose.model("product", productSchema);
 export default productModel;

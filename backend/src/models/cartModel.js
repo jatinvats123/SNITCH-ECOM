@@ -26,6 +26,11 @@ const cartSchema = new mongoose.Schema({
   ],
 });
 
+// Every cart operation looks the cart up by user; without this it full-scans the
+// collection. Not marked unique yet: enforcing uniqueness first requires
+// de-duplicating any carts created by the findOne-or-create race (a separate migration).
+cartSchema.index({ user: 1 });
+
 const cartModel = mongoose.model("cart", cartSchema);
 
 export default cartModel;
