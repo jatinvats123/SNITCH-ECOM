@@ -24,6 +24,7 @@ The backend is deliberately layered — routes stay thin, validation runs before
 ## Features
 
 ### Authentication
+
 - Email and password registration with server-side validation
 - Google OAuth 2.0 sign-in via Passport
 - JWT issued as an HTTP-only cookie
@@ -31,12 +32,14 @@ The backend is deliberately layered — routes stay thin, validation runs before
 - Role-based access control with `buyer` and `seller` roles
 
 ### Seller
+
 - Create products with up to 7 images per upload
 - Add and remove product variants (size, colour, pricing)
 - View and manage own product listings
 - Images uploaded through Multer and served from the ImageKit CDN
 
 ### Buyer
+
 - Browse the full catalog and view product detail pages
 - Add items to cart at the variant level
 - Increment, decrement, and remove cart items
@@ -46,14 +49,14 @@ The backend is deliberately layered — routes stay thin, validation runs before
 
 ## Tech stack
 
-| Layer | Technologies |
-|---|---|
+| Layer    | Technologies                                                         |
+| -------- | -------------------------------------------------------------------- |
 | Frontend | React 19, Redux Toolkit, React Router 7, Tailwind CSS 4, Axios, Vite |
-| Backend | Node.js, Express 5, MongoDB, Mongoose |
-| Auth | JWT, bcryptjs, Passport (Google OAuth 2.0), express-validator |
-| Payments | Razorpay |
-| Media | Multer, ImageKit |
-| Email | Nodemailer over SMTP |
+| Backend  | Node.js, Express 5, MongoDB, Mongoose                                |
+| Auth     | JWT, bcryptjs, Passport (Google OAuth 2.0), express-validator        |
+| Payments | Razorpay                                                             |
+| Media    | Multer, ImageKit                                                     |
+| Email    | Nodemailer over SMTP                                                 |
 
 ---
 
@@ -90,49 +93,54 @@ Each request passes validation and authentication before reaching a controller, 
 Base URL: `/api`
 
 ### Auth — `/api/auth`
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| POST | `/register` | Public | Register a new account |
-| POST | `/login` | Public | Log in and receive a JWT cookie |
-| POST | `/logout` | Public | Clear the session cookie |
-| GET | `/google` | Public | Start Google OAuth flow |
-| GET | `/google/callback` | Public | OAuth callback handler |
-| GET | `/me` | Private | Get the current authenticated user |
-| POST | `/forgot-password` | Public | Send a password-reset email |
-| POST | `/reset-password/:token` | Public | Reset password using an emailed token |
+
+| Method | Endpoint                 | Access  | Description                           |
+| ------ | ------------------------ | ------- | ------------------------------------- |
+| POST   | `/register`              | Public  | Register a new account                |
+| POST   | `/login`                 | Public  | Log in and receive a JWT cookie       |
+| POST   | `/logout`                | Public  | Clear the session cookie              |
+| GET    | `/google`                | Public  | Start Google OAuth flow               |
+| GET    | `/google/callback`       | Public  | OAuth callback handler                |
+| GET    | `/me`                    | Private | Get the current authenticated user    |
+| POST   | `/forgot-password`       | Public  | Send a password-reset email           |
+| POST   | `/reset-password/:token` | Public  | Reset password using an emailed token |
 
 ### Products — `/api/products`
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| GET | `/` | Public | List all products |
-| GET | `/detail/:productId` | Public | Get a single product |
-| POST | `/` | Seller | Create a product with images |
-| GET | `/seller` | Seller | List the seller's own products |
-| DELETE | `/:productId` | Seller | Delete a product |
-| POST | `/:productId/variants` | Seller | Add a variant |
-| DELETE | `/:productId/variants/:variantId` | Seller | Delete a variant |
+
+| Method | Endpoint                          | Access | Description                    |
+| ------ | --------------------------------- | ------ | ------------------------------ |
+| GET    | `/`                               | Public | List all products              |
+| GET    | `/detail/:productId`              | Public | Get a single product           |
+| POST   | `/`                               | Seller | Create a product with images   |
+| GET    | `/seller`                         | Seller | List the seller's own products |
+| DELETE | `/:productId`                     | Seller | Delete a product               |
+| POST   | `/:productId/variants`            | Seller | Add a variant                  |
+| DELETE | `/:productId/variants/:variantId` | Seller | Delete a variant               |
 
 ### Cart — `/api/cart`
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| GET | `/` | Private | Get the current user's cart |
-| POST | `/add/:productId` | Private | Add an item to the cart |
-| PATCH | `/quantity/increament/:productId/:variantId` | Private | Increase quantity |
-| PATCH | `/quantity/decrement/:productId/:variantId` | Private | Decrease quantity |
-| DELETE | `/remove/:productId/:variantId` | Private | Remove an item |
+
+| Method | Endpoint                                     | Access  | Description                 |
+| ------ | -------------------------------------------- | ------- | --------------------------- |
+| GET    | `/`                                          | Private | Get the current user's cart |
+| POST   | `/add/:productId`                            | Private | Add an item to the cart     |
+| PATCH  | `/quantity/increament/:productId/:variantId` | Private | Increase quantity           |
+| PATCH  | `/quantity/decrement/:productId/:variantId`  | Private | Decrease quantity           |
+| DELETE | `/remove/:productId/:variantId`              | Private | Remove an item              |
 
 ### Payment — `/api/payment`
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| POST | `/create-order` | Private | Create a Razorpay order |
-| POST | `/verify` | Private | Verify the payment signature |
-| POST | `/failure` | Private | Record a failed payment |
+
+| Method | Endpoint        | Access  | Description                  |
+| ------ | --------------- | ------- | ---------------------------- |
+| POST   | `/create-order` | Private | Create a Razorpay order      |
+| POST   | `/verify`       | Private | Verify the payment signature |
+| POST   | `/failure`      | Private | Record a failed payment      |
 
 ---
 
 ## Getting started
 
 ### Prerequisites
+
 - Node.js 18 or higher
 - A MongoDB instance (local or Atlas)
 - Razorpay, ImageKit, Google OAuth, and SMTP credentials

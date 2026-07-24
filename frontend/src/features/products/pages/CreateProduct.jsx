@@ -1,6 +1,6 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router';
-import { useProduct } from '../hooks/useProduct';
+import React, { useState, useRef, useCallback } from "react";
+import { useNavigate } from "react-router";
+import { useProduct } from "../hooks/useProduct";
 
 const MAX_IMAGES = 7;
 
@@ -9,10 +9,10 @@ const CreateProduct = () => {
   const { handleCreateProduct } = useProduct();
 
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    priceAmount: '',
-    priceCurrency: 'USD',
+    title: "",
+    description: "",
+    priceAmount: "",
+    priceCurrency: "USD",
   });
   const [images, setImages] = useState([]); // [{ file, preview }]
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,12 +22,12 @@ const CreateProduct = () => {
   const fileInputRef = useRef(null);
 
   const inputClassName =
-    'w-full rounded-2xl border border-black/5 bg-white/80 px-5 py-4 text-sm text-[#1f1b17] placeholder:text-[#8a7a64]/60 shadow-[0_10px_30px_rgba(31,27,23,0.03)] transition-all duration-300 focus:border-[#d8c39a] focus:outline-none focus:ring-4 focus:ring-[#d8c39a]/20';
+    "w-full rounded-2xl border border-black/5 bg-white/80 px-5 py-4 text-sm text-[#1f1b17] placeholder:text-[#8a7a64]/60 shadow-[0_10px_30px_rgba(31,27,23,0.03)] transition-all duration-300 focus:border-[#d8c39a] focus:outline-none focus:ring-4 focus:ring-[#d8c39a]/20";
 
-  const labelClassName = 'mb-3 block text-[0.7rem] uppercase tracking-[0.28em] text-[#8a7a64]';
+  const labelClassName = "mb-3 block text-[0.7rem] uppercase tracking-[0.28em] text-[#8a7a64]";
 
   const panelClassName =
-    'rounded-4xl border border-black/5 bg-white/75 p-6 shadow-[0_24px_80px_rgba(31,27,23,0.06)] backdrop-blur-xl sm:p-8';
+    "rounded-4xl border border-black/5 bg-white/75 p-6 shadow-[0_24px_80px_rgba(31,27,23,0.06)] backdrop-blur-xl sm:p-8";
 
   // ── Handlers ────────────────────────────────────────────────────────────────
   const handleChange = (e) => {
@@ -48,7 +48,7 @@ const CreateProduct = () => {
       preview: URL.createObjectURL(file),
     }));
     setImages((prev) => [...prev, ...toAdd]);
-    e.target.value = '';
+    e.target.value = "";
   };
 
   const removeImage = useCallback((index) => {
@@ -65,21 +65,19 @@ const CreateProduct = () => {
     setSuccess(null);
     try {
       const payload = new FormData();
-      payload.append('title', formData.title);
-      payload.append('description', formData.description);
-      payload.append('priceAmount', formData.priceAmount);
-      payload.append('priceCurrency', formData.priceCurrency);
-      images.forEach(({ file }) => payload.append('images', file));
+      payload.append("title", formData.title);
+      payload.append("description", formData.description);
+      payload.append("priceAmount", formData.priceAmount);
+      payload.append("priceCurrency", formData.priceCurrency);
+      images.forEach(({ file }) => payload.append("images", file));
 
       const response = await handleCreateProduct(payload);
-      setSuccess(response?.message || 'Product created successfully.');
+      setSuccess(response?.message || "Product created successfully.");
     } catch (err) {
       const data = err?.response?.data;
       // Backend returns { message } or express-validator's { errors: [{ msg }] }.
       setError(
-        data?.message ||
-        data?.errors?.[0]?.msg ||
-        'Something went wrong. Please try again.'
+        data?.message || data?.errors?.[0]?.msg || "Something went wrong. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -98,7 +96,10 @@ const CreateProduct = () => {
           />
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); removeImage(index); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              removeImage(index);
+            }}
             className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-[#1f1b17] opacity-0 backdrop-blur-md transition-opacity duration-200 hover:bg-[#1f1b17] hover:text-[#f7f3ec] group-hover:opacity-100"
             aria-label="Remove image"
           >
@@ -115,9 +116,11 @@ const CreateProduct = () => {
 
     return (
       <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-        <span className="text-3xl text-[#b5a38a] transition-colors duration-200 group-hover:text-[#1f1b17]">+</span>
+        <span className="text-3xl text-[#b5a38a] transition-colors duration-200 group-hover:text-[#1f1b17]">
+          +
+        </span>
         <span className="text-[0.62rem] font-medium uppercase tracking-[0.24em] text-[#8a7a64] transition-colors duration-200">
-          {index === 0 ? 'Cover Image' : 'Add Photo'}
+          {index === 0 ? "Cover Image" : "Add Photo"}
         </span>
       </div>
     );
@@ -125,7 +128,10 @@ const CreateProduct = () => {
 
   // ── JSX ─────────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#f5f1ea] text-[#1f1b17]" style={{ fontFamily: "'Manrope', sans-serif" }}>
+    <div
+      className="min-h-screen bg-[#f5f1ea] text-[#1f1b17]"
+      style={{ fontFamily: "'Manrope', sans-serif" }}
+    >
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#d8c39a]/25 blur-3xl" />
         <div className="absolute right-0 top-32 h-80 w-80 rounded-full bg-[#efe5d1] blur-3xl" />
@@ -151,7 +157,8 @@ const CreateProduct = () => {
             <div className="mt-12 rounded-3xl border border-black/5 bg-white/70 p-5 shadow-[0_18px_50px_rgba(31,27,23,0.06)]">
               <p className="text-xs uppercase tracking-[0.25em] text-[#8a7a64]">Guidance</p>
               <p className="mt-3 text-sm leading-6 text-[#5d5448]">
-                Keep the form calm, detailed, and easy to scan. Use a clear cover image and simple product copy.
+                Keep the form calm, detailed, and easy to scan. Use a clear cover image and simple
+                product copy.
               </p>
             </div>
           </div>
@@ -174,7 +181,7 @@ const CreateProduct = () => {
               disabled={isSubmitting}
               className="inline-flex w-full items-center justify-center rounded-full bg-[#1f1b17] px-6 py-3 text-sm font-medium text-[#f7f3ec] transition-transform hover:-translate-y-0.5 hover:bg-[#2b251f] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isSubmitting ? 'Publishing…' : 'Publish Product'}
+              {isSubmitting ? "Publishing…" : "Publish Product"}
             </button>
           </div>
         </div>
@@ -191,12 +198,15 @@ const CreateProduct = () => {
 
         <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 md:px-10 md:py-10 lg:px-12 lg:py-12">
           <section className={`${panelClassName} mb-8 lg:mb-10`}>
-            <p className="text-[0.7rem] uppercase tracking-[0.35em] text-[#8a7a64]">Seller dashboard</p>
+            <p className="text-[0.7rem] uppercase tracking-[0.35em] text-[#8a7a64]">
+              Seller dashboard
+            </p>
             <h1 className="mt-4 text-4xl font-semibold tracking-tight text-[#1f1b17] sm:text-5xl lg:text-6xl">
               Create a product with more breathing room.
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-[#6d6357] sm:text-lg">
-              Keep the listing process clean and calm. Add the essentials, choose a cover image, and publish when it feels ready.
+              Keep the listing process clean and calm. Add the essentials, choose a cover image, and
+              publish when it feels ready.
             </p>
           </section>
 
@@ -204,15 +214,23 @@ const CreateProduct = () => {
             <section className={panelClassName}>
               <div className="mb-6 flex items-end justify-between gap-4 border-b border-black/5 pb-5">
                 <div>
-                  <p className="text-[0.7rem] uppercase tracking-[0.35em] text-[#8a7a64]">Identity</p>
-                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[#1f1b17]">Product details</h2>
+                  <p className="text-[0.7rem] uppercase tracking-[0.35em] text-[#8a7a64]">
+                    Identity
+                  </p>
+                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[#1f1b17]">
+                    Product details
+                  </h2>
                 </div>
-                <span className="hidden text-sm text-[#6d6357] sm:block">Describe the product clearly</span>
+                <span className="hidden text-sm text-[#6d6357] sm:block">
+                  Describe the product clearly
+                </span>
               </div>
 
               <div className="space-y-6">
                 <div>
-                  <label htmlFor="title" className={labelClassName}>Product Title</label>
+                  <label htmlFor="title" className={labelClassName}>
+                    Product Title
+                  </label>
                   <input
                     type="text"
                     id="title"
@@ -226,7 +244,9 @@ const CreateProduct = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="description" className={labelClassName}>Description</label>
+                  <label htmlFor="description" className={labelClassName}>
+                    Description
+                  </label>
                   <textarea
                     id="description"
                     name="description"
@@ -244,14 +264,20 @@ const CreateProduct = () => {
             <section className={panelClassName}>
               <div className="mb-6 flex items-end justify-between gap-4 border-b border-black/5 pb-5">
                 <div>
-                  <p className="text-[0.7rem] uppercase tracking-[0.35em] text-[#8a7a64]">Pricing</p>
-                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[#1f1b17]">Set the value</h2>
+                  <p className="text-[0.7rem] uppercase tracking-[0.35em] text-[#8a7a64]">
+                    Pricing
+                  </p>
+                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[#1f1b17]">
+                    Set the value
+                  </h2>
                 </div>
               </div>
 
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="priceAmount" className={labelClassName}>Price Amount</label>
+                  <label htmlFor="priceAmount" className={labelClassName}>
+                    Price Amount
+                  </label>
                   <input
                     type="number"
                     id="priceAmount"
@@ -267,7 +293,9 @@ const CreateProduct = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="priceCurrency" className={labelClassName}>Currency</label>
+                  <label htmlFor="priceCurrency" className={labelClassName}>
+                    Currency
+                  </label>
                   <div className="relative">
                     <select
                       id="priceCurrency"
@@ -283,7 +311,13 @@ const CreateProduct = () => {
                     </select>
                     <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#8a7a64]">
                       <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        <path
+                          d="M2 4L6 8L10 4"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
                       </svg>
                     </span>
                   </div>
@@ -295,9 +329,13 @@ const CreateProduct = () => {
               <div className="mb-6 flex items-end justify-between gap-4 border-b border-black/5 pb-5">
                 <div>
                   <p className="text-[0.7rem] uppercase tracking-[0.35em] text-[#8a7a64]">Images</p>
-                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[#1f1b17]">Upload photos</h2>
+                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[#1f1b17]">
+                    Upload photos
+                  </h2>
                 </div>
-                <p className="hidden text-sm text-[#6d6357] sm:block">First image becomes the cover</p>
+                <p className="hidden text-sm text-[#6d6357] sm:block">
+                  First image becomes the cover
+                </p>
               </div>
 
               <input
@@ -315,13 +353,13 @@ const CreateProduct = () => {
                   const isEmpty = !hasImage;
                   const isDisabledSlot = isEmpty && images.length >= MAX_IMAGES;
                   const slotClasses = [
-                    'relative overflow-hidden rounded-3xl transition-all duration-200 group aspect-4/5',
-                    index === 0 ? 'md:row-span-2 md:aspect-auto md:min-h-[28rem]' : 'min-h-52',
+                    "relative overflow-hidden rounded-3xl transition-all duration-200 group aspect-4/5",
+                    index === 0 ? "md:row-span-2 md:aspect-auto md:min-h-[28rem]" : "min-h-52",
                     isEmpty
-                      ? 'border border-dashed border-black/10 bg-[#fbf8f3] hover:border-black/20 hover:bg-white cursor-pointer'
-                      : 'bg-[#efe8de] cursor-default',
-                    isDisabledSlot ? 'opacity-25 cursor-not-allowed' : '',
-                  ].join(' ');
+                      ? "border border-dashed border-black/10 bg-[#fbf8f3] hover:border-black/20 hover:bg-white cursor-pointer"
+                      : "bg-[#efe8de] cursor-default",
+                    isDisabledSlot ? "opacity-25 cursor-not-allowed" : "",
+                  ].join(" ");
 
                   if (isEmpty) {
                     return (
@@ -331,7 +369,7 @@ const CreateProduct = () => {
                         onClick={!isDisabledSlot ? handleImageSlotClick : undefined}
                         disabled={isDisabledSlot}
                         className={slotClasses}
-                        aria-label={index === 0 ? 'Upload cover image' : 'Add photo'}
+                        aria-label={index === 0 ? "Upload cover image" : "Add photo"}
                       >
                         {renderSlot(index)}
                       </button>
@@ -373,7 +411,7 @@ const CreateProduct = () => {
                 disabled={isSubmitting}
                 className="inline-flex w-full items-center justify-center rounded-full bg-[#1f1b17] px-6 py-3 text-sm font-medium text-[#f7f3ec] transition-transform hover:-translate-y-0.5 hover:bg-[#2b251f] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isSubmitting ? 'Publishing…' : 'Publish Product'}
+                {isSubmitting ? "Publishing…" : "Publish Product"}
               </button>
             </div>
           </form>

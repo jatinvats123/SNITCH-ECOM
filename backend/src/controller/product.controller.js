@@ -4,33 +4,32 @@ import { uploadFile } from "../services/storage.service.js";
 
 export async function createProduct(req, res) {
   try {
-    const {title, description, priceAmount,priceCurrency} = req.body;
+    const { title, description, priceAmount, priceCurrency } = req.body;
     const seller = req.user;
 
     const files = req.files || [];
-    const images = await Promise.all(files.map(async (file) => {
-      const uploaded = await uploadFile({
-        buffer: file.buffer,
-        fileName: file.originalname,
-      });
+    const images = await Promise.all(
+      files.map(async (file) => {
+        const uploaded = await uploadFile({
+          buffer: file.buffer,
+          fileName: file.originalname,
+        });
 
-      return { url: uploaded.url };
-    }));
+        return { url: uploaded.url };
+      }),
+    );
 
     const product = await productModel.create({
       title,
       description,
-      price:{
-          amount: priceAmount,
-          currency: priceCurrency || "INR"
+      price: {
+        amount: priceAmount,
+        currency: priceCurrency || "INR",
       },
       images,
-      seller: seller._id
-    })
-    res.status(201).json(
-    {message:"Product created successfully",
-        success:true,
-        product})
+      seller: seller._id,
+    });
+    res.status(201).json({ message: "Product created successfully", success: true, product });
   } catch (error) {
     console.error("Error creating product:", error);
     res.status(500).json({
@@ -40,7 +39,7 @@ export async function createProduct(req, res) {
   }
 }
 
-export async function getSellerProducts(req,res){
+export async function getSellerProducts(req, res) {
   const seller = req.user;
   const products = await productModel.find({ seller: seller._id });
 
@@ -57,7 +56,7 @@ const SORT_OPTIONS = {
   newest: { createdAt: -1 },
 };
 
-export async function getAllProducts(req,res){
+export async function getAllProducts(req, res) {
   const { q, minPrice, maxPrice, sort, page = 1, limit = 12 } = req.query;
 
   const filter = {};
@@ -76,7 +75,8 @@ export async function getAllProducts(req,res){
   const limitNum = Math.max(1, Number(limit) || 12);
 
   const [products, total] = await Promise.all([
-    productModel.find(filter)
+    productModel
+      .find(filter)
       .sort(sortOption)
       .skip((pageNum - 1) * limitNum)
       .limit(limitNum),
@@ -95,20 +95,20 @@ export async function getAllProducts(req,res){
     },
   });
 }
-export async function getProductDetail(req,res){
-  const {productId}=req.params;
-  const product = await productModel.findById(productId)
-  if(!product){
+export async function getProductDetail(req, res) {
+  const { productId } = req.params;
+  const product = await productModel.findById(productId);
+  if (!product) {
     return res.status(404).json({
-      message:"Product not found",
-      success:false
-    })
+      message: "Product not found",
+      success: false,
+    });
   }
   res.status(200).json({
-    message:"Product fetched successfully",
-    success:true,
-    product
-  })
+    message: "Product fetched successfully",
+    success: true,
+    product,
+  });
 }
 
 export async function deleteProduct(req, res) {
@@ -148,49 +148,52 @@ export async function deleteProduct(req, res) {
   }
 }
 
-export async function addProductVariant(req,res){
-
-  try{
+export async function addProductVariant(req, res) {
+  try {
     const { productId } = req.params;
     const { title, description, stock } = req.body;
     let { attributes } = req.body;
-    const priceAmount = req.body.price?.amount ?? req.body["price.amount"] ?? req.body["price[amount]"];
-    const priceCurrency = req.body.price?.currency ?? req.body["price.currency"] ?? req.body["price[currency]"];
+    const priceAmount =
+      req.body.price?.amount ?? req.body["price.amount"] ?? req.body["price[amount]"];
+    const priceCurrency =
+      req.body.price?.currency ?? req.body["price.currency"] ?? req.body["price[currency]"];
     const seller = req.user;
 
     // Parse attributes if it's a JSON string
-    if (typeof attributes === 'string') {
+    if (typeof attributes === "string") {
       attributes = JSON.parse(attributes);
     }
 
     const product = await productModel.findById(productId);
-    if(!product){
+    if (!product) {
       return res.status(404).json({
-        message:"Product not found",
-        success:false
-      })
+        message: "Product not found",
+        success: false,
+      });
     }
 
     // Verify seller owns this product
     const productSellerId = String(product.seller?._id ?? product.seller);
     const currentSellerId = String(seller?._id ?? seller);
-    if(productSellerId !== currentSellerId){
+    if (productSellerId !== currentSellerId) {
       return res.status(403).json({
-        message:"You are not authorized to add variants to this product",
-        success:false
-      })
+        message: "You are not authorized to add variants to this product",
+        success: false,
+      });
     }
 
     // Upload variant images
     let images = [];
-    if(req.files && req.files.length > 0) {
-      images = await Promise.all(req.files.map(async (file) => {
-        const uploaded = await uploadFile({
-          buffer: file.buffer,
-          fileName: file.originalname,
-        });
-        return { url: uploaded.url };
-      }));
+    if (req.files && req.files.length > 0) {
+      images = await Promise.all(
+        req.files.map(async (file) => {
+          const uploaded = await uploadFile({
+            buffer: file.buffer,
+            fileName: file.originalname,
+          });
+          return { url: uploaded.url };
+        }),
+      );
     }
 
     // Add variant to product
@@ -199,12 +202,12 @@ export async function addProductVariant(req,res){
       description: description || product.description,
       price: {
         amount: Number(priceAmount ?? product.price.amount),
-        currency: priceCurrency || product.price.currency
+        currency: priceCurrency || product.price.currency,
       },
       images,
       attributes: attributes || {},
       stock: Number(stock) || 0,
-      variantId: new mongoose.Types.ObjectId()
+      variantId: new mongoose.Types.ObjectId(),
     };
 
     product.variants = product.variants || [];
@@ -212,17 +215,17 @@ export async function addProductVariant(req,res){
     await product.save();
 
     res.status(201).json({
-      message:"Variant added successfully",
-      success:true,
-      product
-    })
-  }catch(error){
+      message: "Variant added successfully",
+      success: true,
+      product,
+    });
+  } catch (error) {
     console.error("Error adding variant:", error);
     res.status(500).json({
-      message:"Error adding variant",
-      success:false,
-      error: error.message
-    })
+      message: "Error adding variant",
+      success: false,
+      error: error.message,
+    });
   }
 }
 
@@ -235,7 +238,7 @@ export async function deleteVariant(req, res) {
     if (!product) {
       return res.status(404).json({
         message: "Product not found",
-        success: false
+        success: false,
       });
     }
 
@@ -245,16 +248,16 @@ export async function deleteVariant(req, res) {
     if (productSellerId !== currentSellerId) {
       return res.status(403).json({
         message: "You are not authorized to delete variants from this product",
-        success: false
+        success: false,
       });
     }
 
     // Find and remove the variant
-    const variantIndex = product.variants.findIndex(v => v._id.toString() === variantId);
+    const variantIndex = product.variants.findIndex((v) => v._id.toString() === variantId);
     if (variantIndex === -1) {
       return res.status(404).json({
         message: "Variant not found",
-        success: false
+        success: false,
       });
     }
 
@@ -264,13 +267,13 @@ export async function deleteVariant(req, res) {
     res.status(200).json({
       message: "Variant deleted successfully",
       success: true,
-      product
+      product,
     });
   } catch (error) {
     res.status(500).json({
       message: "Error deleting variant",
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 }

@@ -1,60 +1,68 @@
-import express from 'express';
-import { authenticateSeller } from '../middleware/auth.middleware.js';
-import { createProduct, addProductVariant, deleteVariant, deleteProduct } from '../controller/product.controller.js';
-import { createProductValidator, createVariantValidator } from '../validator/product.validator.js';
-import { getSellerProducts } from '../controller/product.controller.js';
-import { getAllProducts } from '../controller/product.controller.js';
-import { getProductDetail } from '../controller/product.controller.js';
+import express from "express";
+import { authenticateSeller } from "../middleware/auth.middleware.js";
+import {
+  createProduct,
+  addProductVariant,
+  deleteVariant,
+  deleteProduct,
+} from "../controller/product.controller.js";
+import { createProductValidator, createVariantValidator } from "../validator/product.validator.js";
+import { getSellerProducts } from "../controller/product.controller.js";
+import { getAllProducts } from "../controller/product.controller.js";
+import { getProductDetail } from "../controller/product.controller.js";
 import multer from "multer";
 
 const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 }, // 
-})
-
-
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, //
+});
 
 const router = express.Router();
 // @route POST /api/products
 // Only authenticated sellers can create products
 // Validate the request body and handle file uploads (up to 7 images)
 // The images will be processed in the controller, where they will be uploaded to a storage service and their URLs will be saved in the database
-router.post("/",authenticateSeller,upload.array('images',7),createProductValidator,createProduct)
+router.post(
+  "/",
+  authenticateSeller,
+  upload.array("images", 7),
+  createProductValidator,
+  createProduct,
+);
 //  @route GET /api/products/seller
 // desc Get all products of the authenticated seller
 // access Private (sellers only)
-router.get("/seller",authenticateSeller,getSellerProducts)
+router.get("/seller", authenticateSeller, getSellerProducts);
 // @route GET /api/products
 // desc Get all products
 // access Public
-router.get("/",getAllProducts)
- 
-
-
-
+router.get("/", getAllProducts);
 
 // @route GET /api/products/detail/:id
 // desc Get product details by ID
 // access Public
-router.get("/detail/:productId",getProductDetail)
+router.get("/detail/:productId", getProductDetail);
 
 // @route DELETE /api/products/:productId
 // @desc Delete a product listing
 // @access Private (sellers only)
-router.delete("/:productId", authenticateSeller, deleteProduct)
-
-
+router.delete("/:productId", authenticateSeller, deleteProduct);
 
 // @route post /api/products/:productId/variants
 // @desc Add a new variant to a product
 // @access Private (sellers only)
 
-router.post("/:productId/variants",authenticateSeller,upload.array('images',7),
-createVariantValidator,addProductVariant)
+router.post(
+  "/:productId/variants",
+  authenticateSeller,
+  upload.array("images", 7),
+  createVariantValidator,
+  addProductVariant,
+);
 
 // @route DELETE /api/products/:productId/variants/:variantId
 // @desc Delete a variant from a product
 // @access Private (sellers only)
-router.delete("/:productId/variants/:variantId", authenticateSeller, deleteVariant)
+router.delete("/:productId/variants/:variantId", authenticateSeller, deleteVariant);
 
 export default router;

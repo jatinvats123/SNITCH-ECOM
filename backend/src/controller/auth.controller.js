@@ -25,7 +25,7 @@ async function sendTokenResponse(user, res, message) {
       id: user._id,
     },
     config.JWT_SECRET,
-    { expiresIn: "100d" }
+    { expiresIn: "100d" },
   );
 
   res.cookie("token", token, cookieOptions);
@@ -34,11 +34,11 @@ async function sendTokenResponse(user, res, message) {
     message,
     success: true,
     user: {
-        id: user._id,
-        email: user.email,
-        contact: user.contact,
-        fullName: user.fullName,
-        role: user.role,
+      id: user._id,
+      email: user.email,
+      contact: user.contact,
+      fullName: user.fullName,
+      role: user.role,
     },
   });
 }
@@ -68,41 +68,41 @@ export const regitser = async (req, res) => {
   }
 };
 
-export const login = async (req, res)=>{
-  const{email,password}= req.body;
+export const login = async (req, res) => {
+  const { email, password } = req.body;
 
-
-  const user = await userModel.findOne({email});
-  if(!user){
-    return res.status(400).json({message:"Invalid credentials"});
+  const user = await userModel.findOne({ email });
+  if (!user) {
+    return res.status(400).json({ message: "Invalid credentials" });
   }
   const isMatch = await user.comparePassword(password);
-  if(!isMatch){
-    return res.status(400).json({message:"Invalid credentials"});
+  if (!isMatch) {
+    return res.status(400).json({ message: "Invalid credentials" });
   }
   await sendTokenResponse(user, res, "User logged in successfully");
-}
+};
 
 export const googleCallBack = async (req, res) => {
-  const {id, displayName, emails}=req.user
+  const { id, displayName, emails } = req.user;
   const email = emails[0].value;
-  let user = await userModel.findOne({email});
-  if(!user){
+  let user = await userModel.findOne({ email });
+  if (!user) {
     user = await userModel.create({
       email,
-      googleId:id,
-      fullName:displayName,
-     
-    })
-
+      googleId: id,
+      fullName: displayName,
+    });
   }
-  const token = jwt.sign({
-    id: user._id,
-  }, config.JWT_SECRET, {expiresIn:"100d"
-  })
+  const token = jwt.sign(
+    {
+      id: user._id,
+    },
+    config.JWT_SECRET,
+    { expiresIn: "100d" },
+  );
   res.cookie("token", token, cookieOptions);
-  res.redirect(`${config.CLIENT_URL}/?google=success`)
-}
+  res.redirect(`${config.CLIENT_URL}/?google=success`);
+};
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -140,7 +140,9 @@ export const resetPassword = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({ message: "Reset link is invalid or has expired", success: false });
+      return res
+        .status(400)
+        .json({ message: "Reset link is invalid or has expired", success: false });
     }
 
     user.password = password;
@@ -164,17 +166,17 @@ export const logout = async (req, res) => {
   res.status(200).json({ message: "Logged out successfully", success: true });
 };
 
-export const getMe = async (req, res)=>{
+export const getMe = async (req, res) => {
   const user = req.user;
   res.status(200).json({
-    message:"User fetched successfully",
-    success:true,
-    user:{
+    message: "User fetched successfully",
+    success: true,
+    user: {
       id: user._id,
       email: user.email,
       contact: user.contact,
       fullName: user.fullName,
       role: user.role,
     },
-  })
-}
+  });
+};

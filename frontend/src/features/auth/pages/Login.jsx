@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "../hook/useAuth";
 import { Link, useNavigate } from "react-router";
@@ -12,10 +12,10 @@ const Login = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -39,7 +39,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsSubmitting(true);
     try {
       const loggedInUser = await handleLogin({
@@ -112,55 +112,64 @@ const Login = () => {
             </p>
           </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="email">
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="name@example.com"
-              required
-              className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
-            />
-          </div>
-
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <label className="block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="password">
-                Password
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label
+                className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55"
+                htmlFor="email"
+              >
+                Email Address
               </label>
-              <Link to="/forgot-password" className="text-[11px] uppercase tracking-[0.22em] text-black/40 transition-all hover:text-black">
-                Forgot your password?
-              </Link>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="name@example.com"
+                required
+                className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
+              />
             </div>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              required
-              className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
-            />
-          </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <label
+                  className="block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55"
+                  htmlFor="password"
+                >
+                  Password
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-[11px] uppercase tracking-[0.22em] text-black/40 transition-all hover:text-black"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                required
+                className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="mt-4 w-full border border-black bg-black py-4 text-[11px] font-medium uppercase tracking-[0.35em] text-white transition-all duration-300 hover:bg-white hover:text-black disabled:opacity-50"
-          >
-            {isSubmitting ? "Logging In..." : "Log In"}
-          </button>
-          <ContinueWithGoogle />
-        </form>
+            {error && <p className="text-sm text-red-600">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="mt-4 w-full border border-black bg-black py-4 text-[11px] font-medium uppercase tracking-[0.35em] text-white transition-all duration-300 hover:bg-white hover:text-black disabled:opacity-50"
+            >
+              {isSubmitting ? "Logging In..." : "Log In"}
+            </button>
+            <ContinueWithGoogle />
+          </form>
 
           <Link
             to="/register"

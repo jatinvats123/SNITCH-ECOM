@@ -1,52 +1,48 @@
-import React, { useState } from 'react';
-import {useAuth} from "../hook/useAuth";
+import React, { useState } from "react";
+import { useAuth } from "../hook/useAuth";
 import { Link, useNavigate } from "react-router";
 import ContinueWithGoogle from "../components/ContinueWithGoogle";
 import Navbar from "../../../components/Navbar";
 const Register = () => {
-  const {handleRegister} = useAuth()
-const navigate = useNavigate();
+  const { handleRegister } = useAuth();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    fullName: '',
-    contactNumber: '',
-    email: '',
-    password: '',
+    fullName: "",
+    contactNumber: "",
+    email: "",
+    password: "",
     isSeller: false,
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsSubmitting(true);
     try {
       await handleRegister({
-        email:formData.email,
-        contact:formData.contactNumber,
-        password:formData.password,
-        fullname:formData.fullName,
-        isSeller:formData.isSeller,
-      })
+        email: formData.email,
+        contact: formData.contactNumber,
+        password: formData.password,
+        fullname: formData.fullName,
+        isSeller: formData.isSeller,
+      });
       navigate("/");
     } catch (err) {
       const data = err?.response?.data;
       // Backend returns either { message } (e.g. "User already exists") or
       // express-validator's { errors: [{ msg }] } — surface whichever is present.
-      setError(
-        data?.message ||
-        data?.errors?.[0]?.msg ||
-        "Registration failed. Please try again."
-      );
+      setError(data?.message || data?.errors?.[0]?.msg || "Registration failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -68,101 +64,116 @@ const navigate = useNavigate();
             </p>
           </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="fullName">
-              Full Name
-            </label>
-            <input
-              type="text"
-              id="fullName"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              placeholder="John Doe"
-              required
-              className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="contactNumber">
-              Contact Number
-            </label>
-            <input
-              type="tel"
-              id="contactNumber"
-              name="contactNumber"
-              value={formData.contactNumber}
-              onChange={handleChange}
-              placeholder="10-digit mobile number"
-              inputMode="numeric"
-              maxLength={10}
-              required
-              className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="email">
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="name@example.com"
-              required
-              className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="password">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              required
-              className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
-            />
-          </div>
-
-          <div className="pt-1 pb-2">
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="isSeller"
-                name="isSeller"
-                checked={formData.isSeller}
-                onChange={handleChange}
-                className="h-5 w-5 rounded border-black/20 bg-transparent text-black focus:ring-black/70 focus:ring-offset-0"
-              />
-              <label htmlFor="isSeller" className="cursor-pointer select-none text-sm text-black/70">
-                Register as a Seller
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label
+                className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55"
+                htmlFor="fullName"
+              >
+                Full Name
               </label>
+              <input
+                type="text"
+                id="fullName"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                placeholder="John Doe"
+                required
+                className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
+              />
             </div>
-          </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+            <div>
+              <label
+                className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55"
+                htmlFor="contactNumber"
+              >
+                Contact Number
+              </label>
+              <input
+                type="tel"
+                id="contactNumber"
+                name="contactNumber"
+                value={formData.contactNumber}
+                onChange={handleChange}
+                placeholder="10-digit mobile number"
+                inputMode="numeric"
+                maxLength={10}
+                required
+                className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="group w-full border border-black bg-black py-4 text-[11px] font-medium uppercase tracking-[0.35em] text-white transition-all duration-300 hover:bg-white hover:text-black disabled:opacity-50"
-          >
-            {isSubmitting ? "Creating Account..." : "Create Account"}
-          </button>
+            <div>
+              <label
+                className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55"
+                htmlFor="email"
+              >
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="name@example.com"
+                required
+                className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
+              />
+            </div>
 
-          <ContinueWithGoogle />
-        </form>
+            <div>
+              <label
+                className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55"
+                htmlFor="password"
+              >
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                required
+                className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
+              />
+            </div>
+
+            <div className="pt-1 pb-2">
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="isSeller"
+                  name="isSeller"
+                  checked={formData.isSeller}
+                  onChange={handleChange}
+                  className="h-5 w-5 rounded border-black/20 bg-transparent text-black focus:ring-black/70 focus:ring-offset-0"
+                />
+                <label
+                  htmlFor="isSeller"
+                  className="cursor-pointer select-none text-sm text-black/70"
+                >
+                  Register as a Seller
+                </label>
+              </div>
+            </div>
+
+            {error && <p className="text-sm text-red-600">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="group w-full border border-black bg-black py-4 text-[11px] font-medium uppercase tracking-[0.35em] text-white transition-all duration-300 hover:bg-white hover:text-black disabled:opacity-50"
+            >
+              {isSubmitting ? "Creating Account..." : "Create Account"}
+            </button>
+
+            <ContinueWithGoogle />
+          </form>
 
           <Link
             to="/login"

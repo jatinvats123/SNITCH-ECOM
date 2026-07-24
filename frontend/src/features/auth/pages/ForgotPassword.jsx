@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { useAuth } from "../hook/useAuth";
 import { Link } from "react-router";
 import Navbar from "../../../components/Navbar";
 
 const ForgotPassword = () => {
   const { handleForgotPassword } = useAuth();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [status, setStatus] = useState(null);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -15,10 +15,10 @@ const ForgotPassword = () => {
     setIsSubmitting(true);
     try {
       const data = await handleForgotPassword(email);
-      setStatus('success');
+      setStatus("success");
       setMessage(data.message);
     } catch (error) {
-      setStatus('error');
+      setStatus("error");
       setMessage(error?.response?.data?.message || "Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -41,14 +41,17 @@ const ForgotPassword = () => {
             </p>
           </div>
 
-          {status === 'success' ? (
+          {status === "success" ? (
             <div className="border border-black/15 px-5 py-4 text-center text-sm text-black/70">
               {message}
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="email">
+                <label
+                  className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55"
+                  htmlFor="email"
+                >
                   Email Address
                 </label>
                 <input
@@ -63,9 +66,7 @@ const ForgotPassword = () => {
                 />
               </div>
 
-              {status === 'error' && (
-                <p className="text-sm text-red-600">{message}</p>
-              )}
+              {status === "error" && <p className="text-sm text-red-600">{message}</p>}
 
               <button
                 type="submit"

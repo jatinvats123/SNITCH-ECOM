@@ -1,17 +1,15 @@
 import { body, validationResult } from "express-validator";
 
 function validateRequest(req, res, next) {
-    const errors = validationResult(req);
-    if(!errors.isEmpty()){
-        return res.status(400).json({errors: errors.array()})
-    }
-    next();
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  next();
 }
 
 export const validateRegisterUser = [
-  body("email")
-    .isEmail()
-    .withMessage("Invalid email"),
+  body("email").isEmail().withMessage("Invalid email"),
 
   body("contact")
     .isString()
@@ -30,30 +28,22 @@ export const validateRegisterUser = [
     .withMessage("Fullname must be string")
     .notEmpty()
     .withMessage("Fullname is required"),
-    body("isSeller")
-    .isBoolean()
-    .withMessage("isSeller must be a boolean"),
-    
-  validateRequest
+  body("isSeller").isBoolean().withMessage("isSeller must be a boolean"),
+
+  validateRequest,
 ];
 export const validateLoginUser = [
-  body("email")
-    .isEmail()
-    .withMessage("Invalid email"),
+  body("email").isEmail().withMessage("Invalid email"),
 
-  body("password")
-    .isString()
-    .withMessage("Password must be string"),
+  body("password").isString().withMessage("Password must be string"),
 
-  validateRequest
+  validateRequest,
 ];
 
 export const validateForgotPassword = [
-  body("email")
-    .isEmail()
-    .withMessage("Invalid email"),
+  body("email").isEmail().withMessage("Invalid email"),
 
-  validateRequest
+  validateRequest,
 ];
 
 export const validateResetPassword = [
@@ -63,5 +53,5 @@ export const validateResetPassword = [
     .isLength({ min: 8 })
     .withMessage("Password must be at least 8 characters"),
 
-  validateRequest
+  validateRequest,
 ];

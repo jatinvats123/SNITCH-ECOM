@@ -4,7 +4,8 @@ import priceSchema from "./price.schema.js";
 // Snapshot of a single line item at the moment the order was placed.
 // Stored on the order (not referenced live) so order history stays accurate
 // even if the product/variant is later edited or deleted.
-const orderItemSchema = new mongoose.Schema({
+const orderItemSchema = new mongoose.Schema(
+  {
     product: { type: mongoose.Schema.Types.ObjectId, ref: "product", required: true },
     variant: { type: mongoose.Schema.Types.ObjectId }, // matches cart item's variantKey
     title: { type: String, required: true },
@@ -12,9 +13,12 @@ const orderItemSchema = new mongoose.Schema({
     image: { type: String, default: "" },
     quantity: { type: Number, required: true, min: 1 },
     price: { type: priceSchema, required: true }, // unit price snapshot (catalog units, e.g. rupees)
-}, { _id: false });
+  },
+  { _id: false },
+);
 
-const orderSchema = new mongoose.Schema({
+const orderSchema = new mongoose.Schema(
+  {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "user", required: true, index: true },
     items: { type: [orderItemSchema], required: true },
 
@@ -26,10 +30,10 @@ const orderSchema = new mongoose.Schema({
     currency: { type: String, default: "INR" },
 
     status: {
-        type: String,
-        enum: ["created", "paid", "failed"],
-        default: "created",
-        index: true,
+      type: String,
+      enum: ["created", "paid", "failed"],
+      default: "created",
+      index: true,
     },
 
     // Razorpay references
@@ -39,7 +43,9 @@ const orderSchema = new mongoose.Schema({
 
     paidAt: { type: Date },
     failureReason: { type: String },
-}, { timestamps: true });
+  },
+  { timestamps: true },
+);
 
 const orderModel = mongoose.model("order", orderSchema);
 

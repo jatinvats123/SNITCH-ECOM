@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { useAuth } from "../hook/useAuth";
 import { Link, useNavigate, useParams } from "react-router";
 import Navbar from "../../../components/Navbar";
@@ -8,14 +8,14 @@ const ResetPassword = () => {
   const { token } = useParams();
   const navigate = useNavigate();
 
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (password !== confirmPassword) {
       setError("Passwords don't match");
@@ -51,7 +51,10 @@ const ResetPassword = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="password">
+              <label
+                className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55"
+                htmlFor="password"
+              >
                 New Password
               </label>
               <input
@@ -68,7 +71,10 @@ const ResetPassword = () => {
             </div>
 
             <div>
-              <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55" htmlFor="confirmPassword">
+              <label
+                className="mb-2 block text-[10px] font-medium uppercase tracking-[0.28em] text-black/55"
+                htmlFor="confirmPassword"
+              >
                 Confirm Password
               </label>
               <input
