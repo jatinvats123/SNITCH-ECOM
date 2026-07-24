@@ -1,0 +1,11 @@
+node_modules
+dist
+dist-ssr
+coverage
+build
+package-lock.json
+*.min.js
+*.min.css
+
+# Deployment config — keep byte-stable, never reformat.
+vercel.json
