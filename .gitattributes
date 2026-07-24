@@ -1,0 +1,12 @@
+# Normalize all text files to LF in the repository, regardless of the
+# contributor's OS, so Windows/macOS/Linux and CI produce identical diffs.
+* text=auto eol=lf
+
+# Binary assets — never normalize or diff as text.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.woff  binary
+*.woff2 binary
