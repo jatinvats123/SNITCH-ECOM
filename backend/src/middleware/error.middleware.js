@@ -41,9 +41,7 @@ export function errorHandler(err, req, res, next) {
     statusCode = 409;
     code = "DUPLICATE_KEY";
     message = "Resource already exists";
-    details = err.keyValue
-      ? Object.keys(err.keyValue).map((field) => ({ field }))
-      : undefined;
+    details = err.keyValue ? Object.keys(err.keyValue).map((field) => ({ field })) : undefined;
   } else if (err?.type === "entity.parse.failed") {
     // express.json() could not parse the request body.
     statusCode = 400;
