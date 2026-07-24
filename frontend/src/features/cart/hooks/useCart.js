@@ -30,8 +30,7 @@ export const useCart = () =>{
 
     async function handleIncrementCartItemQuantity(productId, variantId){
         try {
-            const data = await incrementCartItemQuantity(productId, variantId);
-            console.log("Quantity incremented:", data);
+            await incrementCartItemQuantity(productId, variantId);
         } catch (error) {
             console.error("Error incrementing cart item quantity:", error);
         }

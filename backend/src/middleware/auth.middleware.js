@@ -16,8 +16,7 @@ export const authenticateUser = async (req, res,next)=>{
         req.user = user;
         next();
     }
-    catch(err){
-        console.log(err)
+    catch{
         return res.status(500).json({message:"Internal Server Error"})
     }
 }
@@ -40,8 +39,7 @@ export const authenticateSeller = async (req, res, next) => {
         req.user = user;
         next();
     }
-    catch(err){
-        console.log(err)
+    catch{
         return res.status(500).json({message:"Internal Server Error"})
     }
 }

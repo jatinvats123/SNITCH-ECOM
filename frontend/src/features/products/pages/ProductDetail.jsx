@@ -13,7 +13,6 @@ const ProductDetail = () => {
     const [selectedVariant, setSelectedVariant] = useState(null);
     const { handleGetProductById } = useProduct();
     const { handleAddToCart } = useCart();
- console.log(product)
     useEffect(() => {
         async function fetchProductDetail() {
             setLoading(true);
