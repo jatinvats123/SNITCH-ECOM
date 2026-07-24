@@ -44,30 +44,6 @@ const ProductDetail = () => {
         return null;
     };
 
-    // Get all unique attributes from all variants
-    const getAllAttributes = () => {
-        const attrSet = new Map();
-        if (product?.variants) {
-            product.variants.forEach(variant => {
-                const attributes = variant.attributes instanceof Map
-                    ? Object.fromEntries(variant.attributes.entries())
-                    : variant.attributes;
-
-                if (attributes) {
-                    Object.entries(attributes).forEach(([key, value]) => {
-                        if (!attrSet.has(key)) {
-                            attrSet.set(key, []);
-                        }
-                        if (!attrSet.get(key).includes(value)) {
-                            attrSet.get(key).push(value);
-                        }
-                    });
-                }
-            });
-        }
-        return attrSet;
-    };
-
     /* ── Loading ── */
     if (loading) {
         return (
@@ -97,7 +73,6 @@ const ProductDetail = () => {
         || 'https://placehold.co/800x1000/f7f7f7/cccccc/webp?text=';
     const displayPrice = getDisplayValue('price');
     const displayStock = getDisplayValue('stock');
-    const displayAttributes = getDisplayValue('attributes');
 
     return (
         <div className="min-h-screen bg-white text-black selection:bg-black/10">

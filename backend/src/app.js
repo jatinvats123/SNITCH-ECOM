@@ -9,9 +9,6 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import {config} from "./config/config.js";
 import productRouter from "./routes/product.routes.js";
 import paymentRouter from "./routes/payment.routes.js";
-import userModel from "./models/user.model.js";
-import productModel from "./models/productModel.js";
-import cartModel from "./models/cartModel.js";
 const app = express();
 
 // Behind Render/Vercel the app runs behind a TLS-terminating proxy — trust it so

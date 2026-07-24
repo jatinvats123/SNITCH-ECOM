@@ -152,7 +152,8 @@ export async function addProductVariant(req,res){
 
   try{
     const { productId } = req.params;
-    let { title, description, stock, attributes } = req.body;
+    const { title, description, stock } = req.body;
+    let { attributes } = req.body;
     const priceAmount = req.body.price?.amount ?? req.body["price.amount"] ?? req.body["price[amount]"];
     const priceCurrency = req.body.price?.currency ?? req.body["price.currency"] ?? req.body["price[currency]"];
     const seller = req.user;

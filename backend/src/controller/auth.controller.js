@@ -84,9 +84,8 @@ export const login = async (req, res)=>{
 }
 
 export const googleCallBack = async (req, res) => {
-  const {id, displayName, emails, photos}=req.user
+  const {id, displayName, emails}=req.user
   const email = emails[0].value;
-  const profilePic = photos[0].value;
   let user = await userModel.findOne({email});
   if(!user){
     user = await userModel.create({

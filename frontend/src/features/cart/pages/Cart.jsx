@@ -8,7 +8,7 @@ import { loadRazorpay } from '../service/loadRazorpay';
 const Cart = () => {
     const cartItems = useSelector((state) => state.cart.items);
     const user = useSelector((state) => state.auth.user);
-    const { handleGetCart, handleAddToCart, handleIncrementCartItemQuantity, handleDecrementCartItemQuantity, handleRemoveCartItem } = useCart();
+    const { handleGetCart, handleIncrementCartItemQuantity, handleDecrementCartItemQuantity, handleRemoveCartItem } = useCart();
     const navigate = useNavigate();
     const [quantities, setQuantities] = useState({});
     const [isProcessing, setIsProcessing] = useState(false);
@@ -146,14 +146,6 @@ const Cart = () => {
         return cartItems.reduce((total, item) => {
             return total + (item.price?.amount * item.quantity || 0);
         }, 0);
-    };
-
-    const handleQuantityChange = (itemId, value) => {
-        const newQuantity = Math.max(1, parseInt(value) || 1);
-        setQuantities((prev) => ({
-            ...prev,
-            [itemId]: newQuantity,
-        }));
     };
 
     const handleIncrement = (item) => {
