@@ -10,6 +10,8 @@ import Home from "../features/products/pages/Home";
 import ProductDetail from "../features/products/pages/ProductDetail";
 import SellerProductDetail from "../features/products/pages/SellerProductDetail";
 import Cart from "../features/cart/pages/Cart";
+import Orders from "../features/orders/pages/Orders";
+import OrderDetail from "../features/orders/pages/OrderDetail";
 
 export const routes = createBrowserRouter([
   {
@@ -70,6 +72,22 @@ export const routes = createBrowserRouter([
     element: (
       <Protected>
         <Cart />
+      </Protected>
+    ),
+  },
+  {
+    path: "/orders",
+    element: (
+      <Protected>
+        <Orders />
+      </Protected>
+    ),
+  },
+  {
+    path: "/orders/:orderId",
+    element: (
+      <Protected>
+        <OrderDetail />
       </Protected>
     ),
   },

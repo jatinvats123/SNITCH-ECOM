@@ -298,6 +298,16 @@ const Navbar = ({ variant = "dark", animatedBrand = false }) => {
           </Link>
         )}
 
+        {user && (
+          <Link
+            to="/orders"
+            onClick={() => setIsMenuOpen(false)}
+            className="rounded-lg px-3 py-3 text-sm font-medium uppercase tracking-[0.2em] text-white/90 transition-colors hover:bg-white/10"
+          >
+            Orders
+          </Link>
+        )}
+
         {user?.role === "seller" && (
           <>
             <Link
