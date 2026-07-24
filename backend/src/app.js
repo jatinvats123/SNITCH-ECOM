@@ -11,6 +11,7 @@ import { config } from "./config/config.js";
 import logger from "./config/logger.js";
 import productRouter from "./routes/product.routes.js";
 import paymentRouter from "./routes/payment.routes.js";
+import healthRouter from "./routes/health.routes.js";
 import { notFound, errorHandler } from "./middleware/error.middleware.js";
 const app = express();
 
@@ -67,6 +68,7 @@ passport.use(
 app.get("/", (_req, res) => {
   res.status(200).json({ message: "Server is running" });
 });
+app.use("/api/health", healthRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/products", productRouter);
 app.use("/api/cart", cartRouter);
