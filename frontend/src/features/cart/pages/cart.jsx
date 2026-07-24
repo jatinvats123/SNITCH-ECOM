@@ -233,9 +233,9 @@ const Cart = () => {
                             {cartItems.map((item) => (
                                 <div
                                     key={item._id}
-                                    className="border border-black/10 rounded-lg p-6 bg-white/50 backdrop-blur-sm hover:border-black/20 transition-all duration-300"
+                                    className="relative border border-black/10 rounded-lg p-6 bg-white/50 backdrop-blur-sm hover:border-black/20 transition-all duration-300"
                                 >
-                                    <div className="flex gap-6">
+                                    <div className="flex gap-4 sm:gap-6">
                                         {/* Product Image */}
                                         <div className="shrink-0">
                                             <div className="w-24 h-32 sm:w-32 sm:h-40 bg-[#f0ede7] rounded-lg overflow-hidden">
@@ -249,7 +249,7 @@ const Cart = () => {
 
                                         {/* Product Details */}
                                         <div className="flex-1 flex flex-col justify-between">
-                                            <div>
+                                            <div className="pr-20 sm:pr-0">
                                                 <h3 className="text-lg sm:text-xl font-medium text-black mb-2 line-clamp-2">
                                                     {item.product?.title}
                                                 </h3>
@@ -264,7 +264,7 @@ const Cart = () => {
                                             </div>
 
                                             {/* Quantity and Price */}
-                                            <div className="flex items-end justify-between">
+                                            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-0">
                                                 <div className="flex items-center gap-4">
                                                     <div>
                                                         <label className="text-[10px] uppercase tracking-[0.25em] text-black/50 mb-2 block">
@@ -290,7 +290,7 @@ const Cart = () => {
                                                     </div>
                                                 </div>
 
-                                                <div className="text-right">
+                                                <div className="text-left sm:text-right">
                                                     <p className="text-[10px] uppercase tracking-[0.25em] text-black/50 mb-1">
                                                         Total
                                                     </p>
@@ -305,7 +305,7 @@ const Cart = () => {
                                         </div>
 
                                         {/* Remove Button */}
-                                        <div className="flex flex-col justify-start">
+                                        <div className="absolute right-4 top-4 sm:static flex flex-col justify-start">
                                             <button
                                                 onClick={() => handleRemove(item)}
                                                 className="text-[10px] uppercase tracking-[0.25em] text-red-600 hover:text-red-700 transition-colors"
