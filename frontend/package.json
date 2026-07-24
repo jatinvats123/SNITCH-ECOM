@@ -13,6 +13,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "test": "echo \"No frontend tests yet — added in Phase 4\" && exit 0",
     "preview": "vite preview"
   },
   "dependencies": {
