@@ -1,11 +1,5 @@
-import { body, validationResult } from "express-validator";
-function validateRequest(req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  next();
-}
+import { body } from "express-validator";
+import { validate } from "../middleware/validate.middleware.js";
 
 function getVariantPriceField(req, field) {
   return req.body?.price?.[field] ?? req.body?.[`price.${field}`] ?? req.body?.[`price[${field}]`];
@@ -24,7 +18,7 @@ export const createProductValidator = [
     .withMessage("Price currency is required")
     .isString()
     .withMessage("Price currency must be a string"),
-  validateRequest,
+  validate,
 ];
 
 export const createVariantValidator = [
@@ -49,5 +43,5 @@ export const createVariantValidator = [
     return true;
   }),
   body("stock").optional().isNumeric().withMessage("Stock must be a number"),
-  validateRequest,
+  validate,
 ];

@@ -1,12 +1,5 @@
-import { body, validationResult } from "express-validator";
-
-function validateRequest(req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  next();
-}
+import { body } from "express-validator";
+import { validate } from "../middleware/validate.middleware.js";
 
 export const validateRegisterUser = [
   body("email").isEmail().withMessage("Invalid email"),
@@ -30,20 +23,20 @@ export const validateRegisterUser = [
     .withMessage("Fullname is required"),
   body("isSeller").isBoolean().withMessage("isSeller must be a boolean"),
 
-  validateRequest,
+  validate,
 ];
 export const validateLoginUser = [
   body("email").isEmail().withMessage("Invalid email"),
 
   body("password").isString().withMessage("Password must be string"),
 
-  validateRequest,
+  validate,
 ];
 
 export const validateForgotPassword = [
   body("email").isEmail().withMessage("Invalid email"),
 
-  validateRequest,
+  validate,
 ];
 
 export const validateResetPassword = [
@@ -53,5 +46,5 @@ export const validateResetPassword = [
     .isLength({ min: 8 })
     .withMessage("Password must be at least 8 characters"),
 
-  validateRequest,
+  validate,
 ];
