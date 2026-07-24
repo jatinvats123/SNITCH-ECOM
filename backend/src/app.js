@@ -1,12 +1,14 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-import morgan from "morgan";
+import { pinoHttp } from "pino-http";
+import { randomUUID } from "crypto";
 import authRouter from "./routes/auth.routes.js";
 import cors from "cors";
 import passport from "passport";
 import cartRouter from "./routes/cart.routes.js";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { config } from "./config/config.js";
+import logger from "./config/logger.js";
 import productRouter from "./routes/product.routes.js";
 import paymentRouter from "./routes/payment.routes.js";
 const app = express();
@@ -15,6 +17,25 @@ const app = express();
 // secure cookies and req.protocol/host are resolved from the forwarded headers.
 app.set("trust proxy", 1);
 
+// Structured request logging with a per-request id, propagated via `x-request-id`.
+// Reuse an inbound id (e.g. set by a proxy) when present, otherwise generate one,
+// and echo it back on the response so clients and proxies can correlate logs.
+app.use(
+  pinoHttp({
+    logger,
+    genReqId: (req, res) => {
+      const id = req.headers["x-request-id"] || randomUUID();
+      res.setHeader("x-request-id", id);
+      return id;
+    },
+    customLogLevel: (_req, res, err) => {
+      if (res.statusCode >= 500 || err) return "error";
+      if (res.statusCode >= 400) return "warn";
+      return "info";
+    },
+  }),
+);
+
 app.use(
   cors({
     origin: config.CLIENT_URL,
@@ -22,7 +43,6 @@ app.use(
   }),
 );
 
-app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
