@@ -103,7 +103,7 @@ const Navbar = ({ variant = "dark", animatedBrand = false }) => {
           </span>
         </button>
 
-        <div className="absolute left-1/2 -translate-x-1/2 text-center">
+        <div className="static translate-x-0 px-2 sm:absolute sm:left-1/2 sm:-translate-x-1/2 sm:px-0 text-center">
           <Link
             to="/"
             className="relative flex items-center justify-center"
