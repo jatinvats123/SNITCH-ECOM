@@ -9,7 +9,7 @@ import Protected from "../features/auth/components/Protected";
 import Home from "../features/products/pages/Home";
 import ProductDetail from "../features/products/pages/ProductDetail";
 import SellerProductDetail from "../features/products/pages/SellerProductDetail";
-import Cart from "../features/cart/pages/cart";
+import Cart from "../features/cart/pages/Cart";
 
 export const routes = createBrowserRouter([
     {
