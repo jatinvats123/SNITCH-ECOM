@@ -1,54 +1,49 @@
 import mongoose from "mongoose";
 import productModel from "../models/productModel.js";
 import { uploadFile } from "../services/storage.service.js";
+import { AppError } from "../utils/AppError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { sendSuccess } from "../utils/response.js";
 
-export async function createProduct(req, res) {
-  try {
-    const { title, description, priceAmount, priceCurrency } = req.body;
-    const seller = req.user;
-
-    const files = req.files || [];
-    const images = await Promise.all(
-      files.map(async (file) => {
-        const uploaded = await uploadFile({
-          buffer: file.buffer,
-          fileName: file.originalname,
-        });
-
-        return { url: uploaded.url };
-      }),
-    );
-
-    const product = await productModel.create({
-      title,
-      description,
-      price: {
-        amount: priceAmount,
-        currency: priceCurrency || "INR",
-      },
-      images,
-      seller: seller._id,
-    });
-    res.status(201).json({ message: "Product created successfully", success: true, product });
-  } catch (error) {
-    console.error("Error creating product:", error);
-    res.status(500).json({
-      message: error.message || "Error creating product",
-      success: false,
-    });
+// Throw 403 unless the product belongs to the given seller. Centralises the
+// ownership check that used to be copy-pasted across three handlers.
+function assertOwnership(product, seller, action) {
+  const productSellerId = String(product.seller?._id ?? product.seller);
+  const currentSellerId = String(seller?._id ?? seller);
+  if (productSellerId !== currentSellerId) {
+    throw AppError.forbidden(`You are not authorized to ${action}`, "NOT_OWNER");
   }
 }
 
-export async function getSellerProducts(req, res) {
-  const seller = req.user;
-  const products = await productModel.find({ seller: seller._id });
-
-  res.status(200).json({
-    message: "Products fetched successfully",
-    success: true,
-    products,
-  });
+async function uploadImages(files = []) {
+  return Promise.all(
+    files.map(async (file) => {
+      const uploaded = await uploadFile({ buffer: file.buffer, fileName: file.originalname });
+      return { url: uploaded.url };
+    }),
+  );
 }
+
+export const createProduct = asyncHandler(async (req, res) => {
+  const { title, description, priceAmount, priceCurrency } = req.body;
+  const seller = req.user;
+
+  const images = await uploadImages(req.files || []);
+
+  const product = await productModel.create({
+    title,
+    description,
+    price: { amount: priceAmount, currency: priceCurrency || "INR" },
+    images,
+    seller: seller._id,
+  });
+  return sendSuccess(res, 201, "Product created successfully", { product });
+});
+
+export const getSellerProducts = asyncHandler(async (req, res) => {
+  const products = await productModel.find({ seller: req.user._id });
+  return sendSuccess(res, 200, "Products fetched successfully", { products });
+});
 
 const SORT_OPTIONS = {
   price_asc: { "price.amount": 1 },
@@ -56,7 +51,7 @@ const SORT_OPTIONS = {
   newest: { createdAt: -1 },
 };
 
-export async function getAllProducts(req, res) {
+export const getAllProducts = asyncHandler(async (req, res) => {
   const { q, minPrice, maxPrice, sort, page = 1, limit = 12 } = req.query;
 
   const filter = {};
@@ -83,9 +78,7 @@ export async function getAllProducts(req, res) {
     productModel.countDocuments(filter),
   ]);
 
-  res.status(200).json({
-    message: "Products fetched successfully",
-    success: true,
+  return sendSuccess(res, 200, "Products fetched successfully", {
     products,
     pagination: {
       page: pageNum,
@@ -94,186 +87,92 @@ export async function getAllProducts(req, res) {
       pages: Math.max(1, Math.ceil(total / limitNum)),
     },
   });
-}
-export async function getProductDetail(req, res) {
+});
+
+export const getProductDetail = asyncHandler(async (req, res) => {
   const { productId } = req.params;
   const product = await productModel.findById(productId);
   if (!product) {
-    return res.status(404).json({
-      message: "Product not found",
-      success: false,
-    });
+    throw AppError.notFound("Product not found", "PRODUCT_NOT_FOUND");
   }
-  res.status(200).json({
-    message: "Product fetched successfully",
-    success: true,
-    product,
-  });
-}
+  return sendSuccess(res, 200, "Product fetched successfully", { product });
+});
 
-export async function deleteProduct(req, res) {
-  try {
-    const { productId } = req.params;
-    const seller = req.user;
+export const deleteProduct = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
 
-    const product = await productModel.findById(productId);
-    if (!product) {
-      return res.status(404).json({
-        message: "Product not found",
-        success: false,
-      });
-    }
-
-    const productSellerId = String(product.seller?._id ?? product.seller);
-    const currentSellerId = String(seller?._id ?? seller);
-    if (productSellerId !== currentSellerId) {
-      return res.status(403).json({
-        message: "You are not authorized to delete this product",
-        success: false,
-      });
-    }
-
-    await productModel.findByIdAndDelete(productId);
-
-    res.status(200).json({
-      message: "Product deleted successfully",
-      success: true,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Error deleting product",
-      success: false,
-      error: error.message,
-    });
+  const product = await productModel.findById(productId);
+  if (!product) {
+    throw AppError.notFound("Product not found", "PRODUCT_NOT_FOUND");
   }
-}
+  assertOwnership(product, req.user, "delete this product");
 
-export async function addProductVariant(req, res) {
-  try {
-    const { productId } = req.params;
-    const { title, description, stock } = req.body;
-    let { attributes } = req.body;
-    const priceAmount =
-      req.body.price?.amount ?? req.body["price.amount"] ?? req.body["price[amount]"];
-    const priceCurrency =
-      req.body.price?.currency ?? req.body["price.currency"] ?? req.body["price[currency]"];
-    const seller = req.user;
+  await productModel.findByIdAndDelete(productId);
+  return sendSuccess(res, 200, "Product deleted successfully");
+});
 
-    // Parse attributes if it's a JSON string
-    if (typeof attributes === "string") {
+export const addProductVariant = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+  const { title, description, stock } = req.body;
+  let { attributes } = req.body;
+  const priceAmount =
+    req.body.price?.amount ?? req.body["price.amount"] ?? req.body["price[amount]"];
+  const priceCurrency =
+    req.body.price?.currency ?? req.body["price.currency"] ?? req.body["price[currency]"];
+
+  // Parse attributes if it's a JSON string.
+  if (typeof attributes === "string") {
+    try {
       attributes = JSON.parse(attributes);
+    } catch {
+      throw AppError.badRequest("Invalid attributes JSON", "INVALID_ATTRIBUTES");
     }
-
-    const product = await productModel.findById(productId);
-    if (!product) {
-      return res.status(404).json({
-        message: "Product not found",
-        success: false,
-      });
-    }
-
-    // Verify seller owns this product
-    const productSellerId = String(product.seller?._id ?? product.seller);
-    const currentSellerId = String(seller?._id ?? seller);
-    if (productSellerId !== currentSellerId) {
-      return res.status(403).json({
-        message: "You are not authorized to add variants to this product",
-        success: false,
-      });
-    }
-
-    // Upload variant images
-    let images = [];
-    if (req.files && req.files.length > 0) {
-      images = await Promise.all(
-        req.files.map(async (file) => {
-          const uploaded = await uploadFile({
-            buffer: file.buffer,
-            fileName: file.originalname,
-          });
-          return { url: uploaded.url };
-        }),
-      );
-    }
-
-    // Add variant to product
-    const variant = {
-      title: title || product.title,
-      description: description || product.description,
-      price: {
-        amount: Number(priceAmount ?? product.price.amount),
-        currency: priceCurrency || product.price.currency,
-      },
-      images,
-      attributes: attributes || {},
-      stock: Number(stock) || 0,
-      variantId: new mongoose.Types.ObjectId(),
-    };
-
-    product.variants = product.variants || [];
-    product.variants.push(variant);
-    await product.save();
-
-    res.status(201).json({
-      message: "Variant added successfully",
-      success: true,
-      product,
-    });
-  } catch (error) {
-    console.error("Error adding variant:", error);
-    res.status(500).json({
-      message: "Error adding variant",
-      success: false,
-      error: error.message,
-    });
   }
-}
 
-export async function deleteVariant(req, res) {
-  try {
-    const { productId, variantId } = req.params;
-    const seller = req.user;
-
-    const product = await productModel.findById(productId);
-    if (!product) {
-      return res.status(404).json({
-        message: "Product not found",
-        success: false,
-      });
-    }
-
-    // Verify seller owns this product
-    const productSellerId = String(product.seller?._id ?? product.seller);
-    const currentSellerId = String(seller?._id ?? seller);
-    if (productSellerId !== currentSellerId) {
-      return res.status(403).json({
-        message: "You are not authorized to delete variants from this product",
-        success: false,
-      });
-    }
-
-    // Find and remove the variant
-    const variantIndex = product.variants.findIndex((v) => v._id.toString() === variantId);
-    if (variantIndex === -1) {
-      return res.status(404).json({
-        message: "Variant not found",
-        success: false,
-      });
-    }
-
-    product.variants.splice(variantIndex, 1);
-    await product.save();
-
-    res.status(200).json({
-      message: "Variant deleted successfully",
-      success: true,
-      product,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Error deleting variant",
-      success: false,
-      error: error.message,
-    });
+  const product = await productModel.findById(productId);
+  if (!product) {
+    throw AppError.notFound("Product not found", "PRODUCT_NOT_FOUND");
   }
-}
+  assertOwnership(product, req.user, "add variants to this product");
+
+  const images = req.files && req.files.length > 0 ? await uploadImages(req.files) : [];
+
+  const variant = {
+    title: title || product.title,
+    description: description || product.description,
+    price: {
+      amount: Number(priceAmount ?? product.price.amount),
+      currency: priceCurrency || product.price.currency,
+    },
+    images,
+    attributes: attributes || {},
+    stock: Number(stock) || 0,
+    variantId: new mongoose.Types.ObjectId(),
+  };
+
+  product.variants = product.variants || [];
+  product.variants.push(variant);
+  await product.save();
+
+  return sendSuccess(res, 201, "Variant added successfully", { product });
+});
+
+export const deleteVariant = asyncHandler(async (req, res) => {
+  const { productId, variantId } = req.params;
+
+  const product = await productModel.findById(productId);
+  if (!product) {
+    throw AppError.notFound("Product not found", "PRODUCT_NOT_FOUND");
+  }
+  assertOwnership(product, req.user, "delete variants from this product");
+
+  const variantIndex = product.variants.findIndex((v) => v._id.toString() === variantId);
+  if (variantIndex === -1) {
+    throw AppError.notFound("Variant not found", "VARIANT_NOT_FOUND");
+  }
+
+  product.variants.splice(variantIndex, 1);
+  await product.save();
+
+  return sendSuccess(res, 200, "Variant deleted successfully", { product });
+});
