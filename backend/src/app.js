@@ -11,6 +11,7 @@ import { config } from "./config/config.js";
 import logger from "./config/logger.js";
 import productRouter from "./routes/product.routes.js";
 import paymentRouter from "./routes/payment.routes.js";
+import orderRouter from "./routes/order.routes.js";
 import healthRouter from "./routes/health.routes.js";
 import { notFound, errorHandler } from "./middleware/error.middleware.js";
 const app = express();
@@ -73,6 +74,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/products", productRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/payment", paymentRouter);
+app.use("/api/orders", orderRouter);
 
 // 404 for anything unmatched, then the central error handler.
 // These two MUST remain the last middleware registered.
