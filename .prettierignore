@@ -9,3 +9,6 @@ package-lock.json
 
 # Deployment config — keep byte-stable, never reformat.
 vercel.json
+
+# Point-in-time Phase 0 audit report — preserved verbatim, not reformatted.
+AUDIT.md
