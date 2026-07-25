@@ -14,11 +14,15 @@ import paymentRouter from "./routes/payment.routes.js";
 import orderRouter from "./routes/order.routes.js";
 import healthRouter from "./routes/health.routes.js";
 import { notFound, errorHandler } from "./middleware/error.middleware.js";
+import { securityHeaders } from "./middleware/security.middleware.js";
 const app = express();
 
 // Behind Render/Vercel the app runs behind a TLS-terminating proxy — trust it so
 // secure cookies and req.protocol/host are resolved from the forwarded headers.
 app.set("trust proxy", 1);
+
+// Security response headers (helmet) — registered first so every response carries them.
+app.use(securityHeaders);
 
 // Structured request logging with a per-request id, propagated via `x-request-id`.
 // Reuse an inbound id (e.g. set by a proxy) when present, otherwise generate one,
