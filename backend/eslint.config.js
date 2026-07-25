@@ -29,5 +29,14 @@ export default [
       "no-console": "off",
     },
   },
+  // Test files run under Jest and use its globals.
+  {
+    files: ["tests/**/*.js"],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
+    },
+  },
   prettier,
 ];

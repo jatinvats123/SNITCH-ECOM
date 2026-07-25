@@ -6,6 +6,9 @@ import pino from "pino";
 // Reads NODE_ENV directly (not the validated config) so logging works even
 // before/without the full environment being present.
 const isProduction = process.env.NODE_ENV === "production";
+// Pretty transport only in real development — not in production (JSON logs) and not
+// under test (avoids leaving a pino-pretty worker-thread handle open after the suite).
+const usePretty = !isProduction && process.env.NODE_ENV !== "test";
 
 export const logger = pino({
   level: process.env.LOG_LEVEL || (isProduction ? "info" : "debug"),
@@ -23,16 +26,16 @@ export const logger = pino({
     ],
     censor: "[REDACTED]",
   },
-  transport: isProduction
-    ? undefined
-    : {
+  transport: usePretty
+    ? {
         target: "pino-pretty",
         options: {
           colorize: true,
           translateTime: "SYS:standard",
           ignore: "pid,hostname",
         },
-      },
+      }
+    : undefined,
 });
 
 export default logger;
