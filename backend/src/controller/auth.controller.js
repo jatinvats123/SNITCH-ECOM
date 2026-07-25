@@ -9,6 +9,10 @@ import { sendSuccess } from "../utils/response.js";
 
 const isProduction = config.NODE_ENV === "production";
 
+// Session length for the JWT and its matching cookie (see config.JWT_EXPIRES_DAYS).
+const SESSION_DAYS = config.JWT_EXPIRES_DAYS;
+const SESSION_MS = SESSION_DAYS * 24 * 60 * 60 * 1000;
+
 // Cookie options.
 // - httpOnly: JS can't read the token (mitigates XSS token theft).
 // - In production the frontend (Vercel) and backend (Render) are different hosts, so the
@@ -19,7 +23,7 @@ const cookieOptions = {
   httpOnly: true,
   secure: isProduction,
   sameSite: isProduction ? "none" : "lax",
-  maxAge: 100 * 24 * 60 * 60 * 1000, // 100 days, matches the JWT expiry
+  maxAge: SESSION_MS, // matches the JWT expiry
 };
 
 // Public-facing view of a user — never leak password or reset tokens.
@@ -32,7 +36,9 @@ const toPublicUser = (user) => ({
 });
 
 function issueToken(user, res) {
-  const token = jwt.sign({ id: user._id }, config.JWT_SECRET, { expiresIn: "100d" });
+  const token = jwt.sign({ id: user._id }, config.JWT_SECRET, {
+    expiresIn: `${SESSION_DAYS}d`,
+  });
   res.cookie("token", token, cookieOptions);
 }
 

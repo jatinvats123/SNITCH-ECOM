@@ -44,6 +44,9 @@ if (!process.env.RAZORPAY_KEY_SECRET) {
 export const config = {
   MONGO_URI: process.env.MONGO_URI,
   JWT_SECRET: process.env.JWT_SECRET,
+  // Session length (days) for the JWT and its cookie. Shortened from 100 to 7 to
+  // limit the exposure window of a stolen token; override via env if needed.
+  JWT_EXPIRES_DAYS: Number(process.env.JWT_EXPIRES_DAYS) || 7,
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY,
