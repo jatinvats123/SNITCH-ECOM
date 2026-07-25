@@ -47,6 +47,14 @@ export function errorHandler(err, req, res, next) {
     statusCode = 400;
     code = "INVALID_JSON";
     message = "Malformed JSON body";
+  } else if (err?.name === "MulterError") {
+    // File-upload limit hit (size, count, or unexpected field).
+    statusCode = 400;
+    code = err.code || "UPLOAD_ERROR";
+    message =
+      err.code === "LIMIT_FILE_SIZE"
+        ? "File too large (max 5 MB)"
+        : "Too many or unexpected files (max 7 images)";
   }
 
   // Attach to the request-scoped logger so the x-request-id travels with the log.

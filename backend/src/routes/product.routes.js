@@ -10,12 +10,7 @@ import { createProductValidator, createVariantValidator } from "../validator/pro
 import { getSellerProducts } from "../controller/product.controller.js";
 import { getAllProducts } from "../controller/product.controller.js";
 import { getProductDetail } from "../controller/product.controller.js";
-import multer from "multer";
-
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, //
-});
+import { uploadImages, validateImageFiles } from "../middleware/upload.middleware.js";
 
 const router = express.Router();
 // @route POST /api/products
@@ -25,7 +20,8 @@ const router = express.Router();
 router.post(
   "/",
   authenticateSeller,
-  upload.array("images", 7),
+  uploadImages,
+  validateImageFiles,
   createProductValidator,
   createProduct,
 );
@@ -55,7 +51,8 @@ router.delete("/:productId", authenticateSeller, deleteProduct);
 router.post(
   "/:productId/variants",
   authenticateSeller,
-  upload.array("images", 7),
+  uploadImages,
+  validateImageFiles,
   createVariantValidator,
   addProductVariant,
 );
