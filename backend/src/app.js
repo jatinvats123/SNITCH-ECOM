@@ -17,6 +17,7 @@ import { notFound, errorHandler } from "./middleware/error.middleware.js";
 import { securityHeaders, sanitizeInput } from "./middleware/security.middleware.js";
 import { generalLimiter } from "./middleware/rateLimit.middleware.js";
 import hpp from "hpp";
+import { AppError } from "./utils/AppError.js";
 const app = express();
 
 // Behind Render/Vercel the app runs behind a TLS-terminating proxy — trust it so
@@ -49,9 +50,27 @@ app.use(
 // the sensitive auth endpoints (see auth.routes.js).
 app.use(generalLimiter);
 
+// CORS: explicit allow-list from env (comma-separated CORS_ORIGINS, defaults to
+// CLIENT_URL); credentialed and never a wildcard. Requests with no Origin header
+// (same-origin, curl, server-to-server) are allowed; disallowed browser origins are
+// rejected with 403. In non-production, localhost origins are additionally allowed.
+const allowedOrigins = (config.CORS_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: config.CLIENT_URL,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+      if (
+        config.NODE_ENV !== "production" &&
+        /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+      ) {
+        return callback(null, true);
+      }
+      return callback(new AppError("Origin not allowed by CORS", 403, "CORS_FORBIDDEN"));
+    },
     credentials: true,
   }),
 );

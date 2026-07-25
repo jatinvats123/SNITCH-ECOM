@@ -53,6 +53,9 @@ export const config = {
   SMTP_PASS: process.env.SMTP_PASS,
   EMAIL_FROM: process.env.EMAIL_FROM,
   CLIENT_URL: process.env.CLIENT_URL,
+  // Comma-separated allow-list of browser origins permitted by CORS.
+  // Defaults to CLIENT_URL so existing single-origin deployments are unaffected.
+  CORS_ORIGINS: process.env.CORS_ORIGINS || process.env.CLIENT_URL,
   RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
   RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
   // "production" enables cross-site secure cookies. Defaults to development so local dev is unaffected.
