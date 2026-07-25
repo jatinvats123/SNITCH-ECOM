@@ -16,13 +16,14 @@ import {
 } from "../controller/auth.controller.js";
 import passport from "passport";
 import { authenticateUser } from "../middleware/auth.middleware.js";
+import { authLimiter } from "../middleware/rateLimit.middleware.js";
 import { config } from "../config/config.js";
 const router = Router();
 
-router.post("/register", validateRegisterUser, regitser);
-router.post("/login", validateLoginUser, login);
-router.post("/forgot-password", validateForgotPassword, forgotPassword);
-router.post("/reset-password/:token", validateResetPassword, resetPassword);
+router.post("/register", authLimiter, validateRegisterUser, regitser);
+router.post("/login", authLimiter, validateLoginUser, login);
+router.post("/forgot-password", authLimiter, validateForgotPassword, forgotPassword);
+router.post("/reset-password/:token", authLimiter, validateResetPassword, resetPassword);
 router.post("/logout", logout);
 router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 

@@ -15,6 +15,7 @@ import orderRouter from "./routes/order.routes.js";
 import healthRouter from "./routes/health.routes.js";
 import { notFound, errorHandler } from "./middleware/error.middleware.js";
 import { securityHeaders } from "./middleware/security.middleware.js";
+import { generalLimiter } from "./middleware/rateLimit.middleware.js";
 const app = express();
 
 // Behind Render/Vercel the app runs behind a TLS-terminating proxy — trust it so
@@ -42,6 +43,10 @@ app.use(
     },
   }),
 );
+
+// General API rate limit (health probes exempt). Strict per-route limits live on
+// the sensitive auth endpoints (see auth.routes.js).
+app.use(generalLimiter);
 
 app.use(
   cors({
