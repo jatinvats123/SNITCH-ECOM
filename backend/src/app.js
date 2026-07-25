@@ -14,8 +14,9 @@ import paymentRouter from "./routes/payment.routes.js";
 import orderRouter from "./routes/order.routes.js";
 import healthRouter from "./routes/health.routes.js";
 import { notFound, errorHandler } from "./middleware/error.middleware.js";
-import { securityHeaders } from "./middleware/security.middleware.js";
+import { securityHeaders, sanitizeInput } from "./middleware/security.middleware.js";
 import { generalLimiter } from "./middleware/rateLimit.middleware.js";
+import hpp from "hpp";
 const app = express();
 
 // Behind Render/Vercel the app runs behind a TLS-terminating proxy — trust it so
@@ -58,6 +59,12 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// NoSQL-injection sanitization, then HTTP parameter-pollution guard. Order matters:
+// sanitizeInput replaces req.query with a plain object so hpp can operate on it safely
+// under Express 5 (where req.query is otherwise a read-only getter).
+app.use(sanitizeInput);
+app.use(hpp());
 
 app.use(passport.initialize());
 
