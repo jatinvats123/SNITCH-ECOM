@@ -3,6 +3,8 @@ export default {
   // Native ESM: no transform (run with node --experimental-vm-modules).
   transform: {},
   setupFiles: ["<rootDir>/tests/setup/env.js"],
+  globalSetup: "<rootDir>/tests/setup/globalSetup.cjs",
+  globalTeardown: "<rootDir>/tests/setup/globalTeardown.cjs",
   testMatch: ["<rootDir>/tests/**/*.test.js"],
   testTimeout: 30000,
   clearMocks: true,

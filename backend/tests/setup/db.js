@@ -1,19 +1,10 @@
 import mongoose from "mongoose";
-import { MongoMemoryReplSet } from "mongodb-memory-server";
 
-// A single-node replica set (not a standalone) because the order-creation flow uses
-// a MongoDB transaction, which requires a replica set. Everything is in-memory, so
-// tests need no external database.
-let replset;
-
+// A single shared in-memory replica set is started once in globalSetup; each test
+// file connects a fresh mongoose connection to it (via the URI in the env) and
+// disconnects in afterAll. Collections are cleared between tests.
 export async function connectDB() {
-  replset = await MongoMemoryReplSet.create({
-    replSet: { count: 1 },
-    // Windows first-launch (Defender scanning the freshly-extracted mongod.exe) can
-    // exceed the default 10s; give the instance more headroom.
-    instanceOpts: [{ launchTimeout: 60000 }],
-  });
-  await mongoose.connect(replset.getUri());
+  await mongoose.connect(process.env.__MONGO_URI__);
 }
 
 export async function clearDB() {
@@ -23,5 +14,4 @@ export async function clearDB() {
 
 export async function disconnectDB() {
   await mongoose.disconnect();
-  if (replset) await replset.stop();
 }
