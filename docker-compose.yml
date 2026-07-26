@@ -1,0 +1,86 @@
+# Local full-stack stack: `docker compose up --build` → app on http://localhost:8080
+# Mongo runs as a single-node replica set because the order-creation flow uses a
+# transaction (transactions require a replica set). The healthcheck initiates the
+# replica set on first boot.
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    command: ["--replSet", "rs0", "--bind_ip_all", "--quiet"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: >
+        mongosh --quiet --eval "try { rs.status().ok } catch (e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] }).ok }"
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 20s
+
+  api:
+    build: ./backend
+    image: aveniq-api
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      # development (not production) so the auth cookie is not `secure` and works
+      # over plain http on localhost; requests are same-origin via the nginx proxy.
+      NODE_ENV: development
+      PORT: "3000"
+      MONGO_URI: mongodb://mongo:27017/aveniq?replicaSet=rs0
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:8080}
+      JWT_SECRET: ${JWT_SECRET:-dev_insecure_change_me}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-placeholder}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-placeholder}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-http://localhost:8080/api/auth/google/callback}
+      IMAGEKIT_PRIVATE_KEY: ${IMAGEKIT_PRIVATE_KEY:-placeholder}
+      SMTP_HOST: ${SMTP_HOST:-smtp.example.test}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-placeholder}
+      SMTP_PASS: ${SMTP_PASS:-placeholder}
+      EMAIL_FROM: ${EMAIL_FROM:-no-reply@aveniq.local}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-rzp_test_placeholder}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-placeholder}
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # One-shot: seeds a demo catalog into the volume, then exits.
+  seed:
+    build: ./backend
+    image: aveniq-api
+    restart: "no"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      MONGO_URI: mongodb://mongo:27017/aveniq?replicaSet=rs0
+    command: ["node", "seed.js"]
+
+  web:
+    build: ./frontend
+    image: aveniq-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+
+volumes:
+  mongo-data:
