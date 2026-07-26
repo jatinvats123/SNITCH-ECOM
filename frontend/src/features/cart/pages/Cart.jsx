@@ -241,6 +241,8 @@ const Cart = () => {
                         <img
                           src={getItemImage(item) || "https://placehold.co/300x400/f7f7f7/cccccc"}
                           alt={item.product?.title}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -253,7 +255,7 @@ const Cart = () => {
                           {item.product?.title}
                         </h3>
                         {getVariantLabel(item) && (
-                          <p className="text-[10px] uppercase tracking-[0.25em] text-black/45 mb-3">
+                          <p className="text-[10px] uppercase tracking-[0.25em] text-black/60 mb-3">
                             {getVariantLabel(item)}
                           </p>
                         )}
@@ -266,7 +268,7 @@ const Cart = () => {
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-0">
                         <div className="flex items-center gap-4">
                           <div>
-                            <label className="text-[10px] uppercase tracking-[0.25em] text-black/50 mb-2 block">
+                            <label className="text-[10px] uppercase tracking-[0.25em] text-black/60 mb-2 block">
                               Quantity
                             </label>
                             <div className="flex items-center border border-black/15 rounded-lg overflow-hidden">
@@ -290,7 +292,7 @@ const Cart = () => {
                         </div>
 
                         <div className="text-left sm:text-right">
-                          <p className="text-[10px] uppercase tracking-[0.25em] text-black/50 mb-1">
+                          <p className="text-[10px] uppercase tracking-[0.25em] text-black/60 mb-1">
                             Total
                           </p>
                           <p className="text-xl sm:text-2xl font-semibold text-black">
@@ -341,7 +343,7 @@ const Cart = () => {
               </div>
 
               <div className="mb-8 flex justify-between items-center">
-                <span className="text-[10px] uppercase tracking-[0.25em] text-black/50">
+                <span className="text-[10px] uppercase tracking-[0.25em] text-black/60">
                   Total Amount
                 </span>
                 <div className="text-right">

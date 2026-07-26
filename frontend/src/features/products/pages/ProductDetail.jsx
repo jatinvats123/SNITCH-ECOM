@@ -57,10 +57,10 @@ const ProductDetail = () => {
   if (!product) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-8">
-        <p className="text-[10px] uppercase tracking-[0.35em] text-black/30">Product not found</p>
+        <p className="text-[10px] uppercase tracking-[0.35em] text-black/60">Product not found</p>
         <button
           onClick={() => navigate("/")}
-          className="text-[11px] uppercase tracking-[0.3em] underline underline-offset-4 text-black/40 hover:text-black transition-colors"
+          className="text-[11px] uppercase tracking-[0.3em] underline underline-offset-4 text-black/60 hover:text-black transition-colors"
         >
           Return to collection
         </button>
@@ -102,7 +102,7 @@ const ProductDetail = () => {
         <div className="pt-28 pb-12">
           <button
             onClick={() => navigate(-1)}
-            className="group inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.35em] text-black/30 hover:text-black transition-colors duration-300"
+            className="group inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.35em] text-black/60 hover:text-black transition-colors duration-300"
           >
             <span className="block w-6 h-px bg-current transition-all duration-300 group-hover:w-10" />
             Collection
@@ -118,6 +118,7 @@ const ProductDetail = () => {
               <img
                 src={currentImage}
                 alt={product.title}
+                fetchPriority="high"
                 className="w-full h-full object-cover object-center transition-opacity duration-500"
               />
             </div>
@@ -138,6 +139,8 @@ const ProductDetail = () => {
                     <img
                       src={img.url}
                       alt=""
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover object-center"
                     />
                   </button>
@@ -149,7 +152,7 @@ const ProductDetail = () => {
           {/* ── Right: Info ── */}
           <div className="flex flex-col lg:sticky lg:top-24 lg:self-start">
             {/* Category label */}
-            <p className="text-[10px] uppercase tracking-[0.4em] text-black/30 mb-10">
+            <p className="text-[10px] uppercase tracking-[0.4em] text-black/60 mb-10">
               New Arrival
             </p>
 
@@ -165,7 +168,7 @@ const ProductDetail = () => {
 
             {/* Stock info */}
             {displayStock !== null && (
-              <p className="text-sm text-black/50 mb-16">
+              <p className="text-sm text-black/60 mb-16">
                 {displayStock > 0 ? `${displayStock} in stock` : "Out of stock"}
               </p>
             )}
@@ -174,7 +177,7 @@ const ProductDetail = () => {
             <div className="w-full h-px bg-black/8 mb-12" />
 
             {/* Description */}
-            <p className="text-sm leading-8 text-black/45 mb-16 max-w-md">{product.description}</p>
+            <p className="text-sm leading-8 text-black/60 mb-16 max-w-md">{product.description}</p>
 
             {/* Rule */}
             <div className="w-full h-px bg-black/8 mb-14" />
@@ -183,7 +186,7 @@ const ProductDetail = () => {
             {product.variants && product.variants.length > 0 && (
               <div className="mb-14">
                 <div className="mb-6">
-                  <p className="text-[10px] uppercase tracking-[0.35em] text-black/50 mb-4">
+                  <p className="text-[10px] uppercase tracking-[0.35em] text-black/60 mb-4">
                     Available Variants
                   </p>
                   <div className="flex flex-wrap gap-4">
@@ -233,7 +236,7 @@ const ProductDetail = () => {
                         setSelectedVariant(null);
                         setSelectedImage(0);
                       }}
-                      className="mt-3 text-[10px] uppercase tracking-[0.3em] text-black/50 hover:text-black underline underline-offset-2 transition-colors"
+                      className="mt-3 text-[10px] uppercase tracking-[0.3em] text-black/60 hover:text-black underline underline-offset-2 transition-colors"
                     >
                       Clear selection
                     </button>
@@ -279,7 +282,7 @@ const ProductDetail = () => {
               ].map(([text]) => (
                 <div key={text} className="flex items-center gap-3">
                   <span className="block w-3 h-px bg-black/25" />
-                  <span className="text-[11px] uppercase tracking-[0.25em] text-black/30">
+                  <span className="text-[11px] uppercase tracking-[0.25em] text-black/60">
                     {text}
                   </span>
                 </div>

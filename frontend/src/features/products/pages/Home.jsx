@@ -1,8 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router";
 import { useProduct } from "../hooks/useProduct";
 import Navbar from "../../../components/Navbar";
+import ProductCard from "../components/ProductCard";
+import ProductCardSkeleton from "../components/ProductCardSkeleton";
 
 const HERO_VIDEO_TRIM_END = 1; // seconds trimmed off the tail for a seamless loop
 const SEARCH_DEBOUNCE_MS = 400;
@@ -40,6 +42,9 @@ const Home = () => {
     setMaxPrice("");
     setSort("newest");
   };
+
+  // Stable so the memoized ProductCards don't re-render on every clock tick.
+  const handleSelect = useCallback((id) => navigate(`/product/${id}`), [navigate]);
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
@@ -178,7 +183,7 @@ const Home = () => {
       <main className="max-w-screen-xl mx-auto px-6 sm:px-10 lg:px-16 pt-24 pb-36">
         {/* Section header */}
         <div className="mb-14">
-          <p className="text-[10px] uppercase tracking-[0.4em] text-black/30 mb-6">
+          <p className="text-[10px] uppercase tracking-[0.4em] text-black/60 mb-6">
             {hasActiveFilters ? "Search" : "New Arrivals"}
           </p>
           <div className="flex items-end justify-between gap-6">
@@ -187,7 +192,7 @@ const Home = () => {
               <br />
               <span className="italic">collection.</span>
             </h2>
-            <p className="hidden sm:block text-sm text-black/35 leading-relaxed max-w-xs text-right">
+            <p className="hidden sm:block text-sm text-black/60 leading-relaxed max-w-xs text-right">
               Premium pieces designed for the modern individual who moves with quiet confidence.
             </p>
           </div>
@@ -202,13 +207,13 @@ const Home = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search the collection…"
-              className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
+              className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/60 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
             />
           </div>
 
           <div className="flex flex-wrap items-end gap-5">
             <div>
-              <label className="mb-1 block text-[10px] uppercase tracking-[0.25em] text-black/40">
+              <label className="mb-1 block text-[10px] uppercase tracking-[0.25em] text-black/60">
                 Min ₹
               </label>
               <input
@@ -217,11 +222,11 @@ const Home = () => {
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
                 placeholder="0"
-                className="w-20 border-0 border-b border-black/15 bg-transparent py-2 text-sm text-black placeholder:text-black/30 focus:border-black focus:outline-none focus:ring-0"
+                className="w-20 border-0 border-b border-black/15 bg-transparent py-2 text-sm text-black placeholder:text-black/60 focus:border-black focus:outline-none focus:ring-0"
               />
             </div>
             <div>
-              <label className="mb-1 block text-[10px] uppercase tracking-[0.25em] text-black/40">
+              <label className="mb-1 block text-[10px] uppercase tracking-[0.25em] text-black/60">
                 Max ₹
               </label>
               <input
@@ -230,16 +235,21 @@ const Home = () => {
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
                 placeholder="Any"
-                className="w-20 border-0 border-b border-black/15 bg-transparent py-2 text-sm text-black placeholder:text-black/30 focus:border-black focus:outline-none focus:ring-0"
+                className="w-20 border-0 border-b border-black/15 bg-transparent py-2 text-sm text-black placeholder:text-black/60 focus:border-black focus:outline-none focus:ring-0"
               />
             </div>
             <div>
-              <label className="mb-1 block text-[10px] uppercase tracking-[0.25em] text-black/40">
+              <label
+                htmlFor="sort-select"
+                className="mb-1 block text-[10px] uppercase tracking-[0.25em] text-black/60"
+              >
                 Sort
               </label>
               <select
+                id="sort-select"
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
+                aria-label="Sort products"
                 className="border-0 border-b border-black/15 bg-transparent py-2 text-sm text-black focus:border-black focus:outline-none focus:ring-0"
               >
                 <option value="newest">Newest</option>
@@ -251,7 +261,7 @@ const Home = () => {
               <button
                 type="button"
                 onClick={handleClearFilters}
-                className="pb-2 text-[11px] uppercase tracking-[0.25em] text-black/40 underline-offset-4 transition-colors hover:text-black hover:underline"
+                className="pb-2 text-[11px] uppercase tracking-[0.25em] text-black/60 underline-offset-4 transition-colors hover:text-black hover:underline"
               >
                 Clear
               </button>
@@ -263,7 +273,7 @@ const Home = () => {
         <div className="w-full h-px bg-black/8 mb-10" />
 
         {!isLoading && (
-          <p className="mb-10 text-xs uppercase tracking-[0.25em] text-black/40">
+          <p className="mb-10 text-xs uppercase tracking-[0.25em] text-black/60">
             {pagination?.total ?? 0} {pagination?.total === 1 ? "piece" : "pieces"}
             {searchTerm ? ` for "${searchTerm}"` : ""}
           </p>
@@ -271,61 +281,22 @@ const Home = () => {
 
         {/* Grid */}
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-40 gap-6">
-            <div className="w-8 h-8 rounded-full border border-black/15 border-t-black/50 animate-spin" />
-            <p className="text-[10px] uppercase tracking-[0.35em] text-black/30">
-              Loading collection…
-            </p>
+          <div className="grid grid-cols-1 gap-x-8 gap-y-20 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
           </div>
         ) : products && products.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-20">
+          <div className="grid grid-cols-1 gap-x-8 gap-y-20 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {products.map((product) => (
-              <div
-                key={product._id}
-                onClick={() => navigate(`/product/${product._id}`)}
-                className="group cursor-pointer"
-              >
-                {/* Image */}
-                <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#f7f7f5] mb-6">
-                  <img
-                    src={
-                      product.images?.length > 0
-                        ? product.images[0].url
-                        : "https://placehold.co/400x533/f7f7f5/cccccc/webp?text="
-                    }
-                    alt={product.title}
-                    className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-[1.03]"
-                  />
-
-                  {/* Hover CTA */}
-                  <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
-                    <div className="py-3.5 bg-black text-white text-[10px] uppercase tracking-[0.35em] text-center">
-                      View Product
-                    </div>
-                  </div>
-                </div>
-
-                {/* Info */}
-                <div className="flex flex-col gap-2 px-0.5">
-                  <h3 className="text-sm font-light text-black/80 leading-snug group-hover:text-black transition-colors duration-200">
-                    {product.title}
-                  </h3>
-                  <p className="text-xs text-black/45 leading-relaxed line-clamp-2">
-                    {product.description}
-                  </p>
-                  <p className="mt-2 text-sm font-light text-black tracking-wide">
-                    {product.price?.currency === "INR" ? "₹" : "$"}
-                    {product.price?.amount?.toLocaleString("en-IN")}
-                  </p>
-                </div>
-              </div>
+              <ProductCard key={product._id} product={product} onSelect={handleSelect} />
             ))}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center gap-4 py-40 text-center">
-            <p className="text-[10px] uppercase tracking-[0.35em] text-black/30">No Results</p>
+            <p className="text-[10px] uppercase tracking-[0.35em] text-black/60">No Results</p>
             <h3 className="text-2xl font-light text-black">Nothing matches your search</h3>
-            <p className="max-w-sm text-sm text-black/45 leading-relaxed">
+            <p className="max-w-sm text-sm text-black/60 leading-relaxed">
               Try a different keyword or clear your filters to see the full collection.
             </p>
             {hasActiveFilters && (
@@ -357,8 +328,8 @@ const Home = () => {
       {/* Footer strip */}
       <footer className="border-t border-black/8 py-10 px-6 sm:px-10 lg:px-16 max-w-screen-xl mx-auto">
         <div className="flex items-center justify-between">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-black/25">Aveniq</p>
-          <p className="text-[10px] uppercase tracking-[0.25em] text-black/20">
+          <p className="text-[10px] uppercase tracking-[0.35em] text-black/60">Aveniq</p>
+          <p className="text-[10px] uppercase tracking-[0.25em] text-black/60">
             © {new Date().getFullYear()}
           </p>
         </div>
