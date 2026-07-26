@@ -1,17 +1,22 @@
+/* eslint-disable react-refresh/only-export-components -- route config exports the router, not components */
+import { lazy } from "react";
 import { createBrowserRouter } from "react-router";
-import Register from "../features/auth/pages/Register";
-import Login from "../features/auth/pages/Login";
-import ForgotPassword from "../features/auth/pages/ForgotPassword";
-import ResetPassword from "../features/auth/pages/ResetPassword";
-import CreateProduct from "../features/products/pages/CreateProduct";
-import Dashboard from "../features/products/pages/Dashboard";
 import Protected from "../features/auth/components/Protected";
-import Home from "../features/products/pages/Home";
-import ProductDetail from "../features/products/pages/ProductDetail";
-import SellerProductDetail from "../features/products/pages/SellerProductDetail";
-import Cart from "../features/cart/pages/Cart";
-import Orders from "../features/orders/pages/Orders";
-import OrderDetail from "../features/orders/pages/OrderDetail";
+
+// Route-level code splitting: each page becomes its own chunk, loaded on demand.
+// The Suspense fallback lives at the app root (App.jsx).
+const Home = lazy(() => import("../features/products/pages/Home"));
+const Register = lazy(() => import("../features/auth/pages/Register"));
+const Login = lazy(() => import("../features/auth/pages/Login"));
+const ForgotPassword = lazy(() => import("../features/auth/pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("../features/auth/pages/ResetPassword"));
+const ProductDetail = lazy(() => import("../features/products/pages/ProductDetail"));
+const CreateProduct = lazy(() => import("../features/products/pages/CreateProduct"));
+const Dashboard = lazy(() => import("../features/products/pages/Dashboard"));
+const SellerProductDetail = lazy(() => import("../features/products/pages/SellerProductDetail"));
+const Cart = lazy(() => import("../features/cart/pages/Cart"));
+const Orders = lazy(() => import("../features/orders/pages/Orders"));
+const OrderDetail = lazy(() => import("../features/orders/pages/OrderDetail"));
 
 export const routes = createBrowserRouter([
   {
