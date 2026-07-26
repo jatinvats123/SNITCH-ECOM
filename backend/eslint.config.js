@@ -38,5 +38,16 @@ export default [
       },
     },
   },
+  // CommonJS helper files (e.g. the Jest global setup/teardown).
+  {
+    files: ["**/*.cjs"],
+    languageOptions: {
+      ecmaVersion: 2023,
+      sourceType: "commonjs",
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
   prettier,
 ];
