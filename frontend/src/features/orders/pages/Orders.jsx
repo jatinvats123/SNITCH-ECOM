@@ -96,7 +96,7 @@ const Orders = () => {
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.25em] text-black/45">
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-black/60">
                     {formatOrderDate(order.paidAt || order.createdAt)}
                   </p>
                   <p className="mt-1 font-mono text-xs text-black/70">#{order._id.slice(-8)}</p>

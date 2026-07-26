@@ -80,7 +80,7 @@ const Register = () => {
                 onChange={handleChange}
                 placeholder="John Doe"
                 required
-                className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
+                className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/60 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
               />
             </div>
 
@@ -101,7 +101,7 @@ const Register = () => {
                 inputMode="numeric"
                 maxLength={10}
                 required
-                className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
+                className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/60 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
               />
             </div>
 
@@ -120,7 +120,7 @@ const Register = () => {
                 onChange={handleChange}
                 placeholder="name@example.com"
                 required
-                className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
+                className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/60 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
               />
             </div>
 
@@ -139,7 +139,7 @@ const Register = () => {
                 onChange={handleChange}
                 placeholder="••••••••"
                 required
-                className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/30 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
+                className="w-full border-0 border-b border-black/15 bg-transparent px-0 py-3 text-[15px] text-black placeholder:text-black/60 transition-all duration-300 focus:border-black focus:outline-none focus:ring-0"
               />
             </div>
 

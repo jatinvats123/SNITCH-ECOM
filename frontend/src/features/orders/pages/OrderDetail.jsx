@@ -47,7 +47,7 @@ const OrderDetail = () => {
   const backLink = (
     <Link
       to="/orders"
-      className="mb-8 inline-block text-[11px] uppercase tracking-[0.3em] text-black/50 underline underline-offset-4 transition-colors hover:text-black"
+      className="mb-8 inline-block text-[11px] uppercase tracking-[0.3em] text-black/60 underline underline-offset-4 transition-colors hover:text-black"
     >
       ← Back to orders
     </Link>
@@ -81,7 +81,7 @@ const OrderDetail = () => {
         <div>
           <h1 className="text-2xl font-light uppercase tracking-[0.28em]">Order</h1>
           <p className="mt-2 font-mono text-xs text-black/60">#{order._id}</p>
-          <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-black/45">
+          <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-black/60">
             {formatOrderDate(order.paidAt || order.createdAt)}
           </p>
         </div>
@@ -109,7 +109,7 @@ const OrderDetail = () => {
               <div>
                 <p className="font-medium">{item.title}</p>
                 {item.label && (
-                  <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-black/45">
+                  <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-black/60">
                     {item.label}
                   </p>
                 )}
