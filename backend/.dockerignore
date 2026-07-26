@@ -1,0 +1,14 @@
+node_modules
+coverage
+tests
+*.log
+.env
+.env.*
+!*.example
+.git
+.gitignore
+Dockerfile
+.dockerignore
+eslint.config.js
+jest.config.mjs
+*.md
