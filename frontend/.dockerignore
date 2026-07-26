@@ -1,0 +1,14 @@
+node_modules
+dist
+dist-ssr
+coverage
+*.log
+.env
+.env.*
+!*.example
+.git
+.gitignore
+Dockerfile
+.dockerignore
+vercel.json
+*.md
