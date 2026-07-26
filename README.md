@@ -4,6 +4,9 @@ A full-stack e-commerce marketplace with buyer and seller roles, product variant
 
 **Live demo → [aveniq-sooty.vercel.app](https://aveniq-sooty.vercel.app)**
 
+[![CI](https://github.com/jatinvats123/SNITCH-ECOM/actions/workflows/ci.yml/badge.svg)](https://github.com/jatinvats123/SNITCH-ECOM/actions/workflows/ci.yml)
+![Coverage](https://img.shields.io/badge/coverage-93%25%20statements-brightgreen)
+
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
 ![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-2.x-764ABC?logo=redux&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)
