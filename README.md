@@ -3,7 +3,7 @@ A full-stack e-commerce marketplace where sellers list products with variants an
 
      
 
-Live demo →  ·  API docs →
+Live demo →  ·  API docs → https://aveniq-sooty.vercel.app/
 
 
 
