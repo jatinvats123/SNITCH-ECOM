@@ -50,9 +50,44 @@ export const getSellerOrders = async (sellerId) => {
   }));
 };
 
-// Create the order transactionally as part of a verified payment, clearing the
-// cart in the same transaction. Idempotent: a repeat verify for the same
-// razorpayOrderId returns the order already created.
+// Atomically decrement variant stock for every line item, as part of the order
+// transaction. The guard `stock: { $gte: quantity }` is what actually prevents
+// overselling: the decrement only matches while enough stock remains, so if two
+// checkouts race for the last unit exactly one update matches — the other sees
+// `modifiedCount === 0` and throws, rolling back the whole transaction. Under a
+// replica set a concurrent decrement instead surfaces as a write conflict that
+// `withTransaction` retries, after which the same guard rejects the loser.
+//
+// Product-level items (no variant) carry no per-variant stock and are skipped.
+const decrementStockOrThrow = async (items, session) => {
+  for (const item of items) {
+    if (!item.variant) continue;
+    const result = await productModel.updateOne(
+      {
+        _id: item.product,
+        variants: {
+          $elemMatch: {
+            // Order items key variants by variantId (see buildOrderItems); match
+            // _id too so any legacy/product-level keying still resolves.
+            $or: [{ variantId: item.variant }, { _id: item.variant }],
+            stock: { $gte: item.quantity },
+          },
+        },
+      },
+      { $inc: { "variants.$.stock": -item.quantity } },
+      { session },
+    );
+    if (result.modifiedCount !== 1) {
+      throw AppError.conflict(`Not enough stock to fulfil "${item.title}"`, "INSUFFICIENT_STOCK");
+    }
+  }
+};
+
+// Create the order transactionally as part of a verified payment. In one
+// transaction it decrements stock for every line item, inserts the order and
+// clears the cart — so a paid order and its inventory move are all-or-nothing.
+// Idempotent: a repeat verify for the same razorpayOrderId returns the order
+// already created without decrementing stock again.
 export const createPaidOrder = async ({
   userId,
   razorpayOrderId,
@@ -80,6 +115,9 @@ export const createPaidOrder = async ({
   try {
     let order;
     await session.withTransaction(async () => {
+      // Reserve inventory first: if any item is short this throws and the whole
+      // transaction (order insert + cart clear) rolls back — nothing persists.
+      await decrementStockOrThrow(items, session);
       const [created] = await orderModel.create(
         [
           {

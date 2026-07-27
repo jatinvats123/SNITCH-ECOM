@@ -83,13 +83,34 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     chargedAmount = undefined;
   }
 
-  const order = await createPaidOrder({
-    userId: req.user._id,
-    razorpayOrderId: razorpay_order_id,
-    razorpayPaymentId: razorpay_payment_id,
-    razorpaySignature: razorpay_signature,
-    chargedAmount,
-  });
+  // The payment is already captured by Razorpay here. Creating the order also
+  // atomically decrements stock; if inventory ran out between checkout and payment
+  // (a rare race we accept over overselling — see PRODUCTION-READINESS.md) the
+  // service throws INSUFFICIENT_STOCK. That is a captured payment with no
+  // fulfillable order, so log it loudly as needing a refund, then re-throw so the
+  // client still gets a clear 409 instead of us silently overselling.
+  let order;
+  try {
+    order = await createPaidOrder({
+      userId: req.user._id,
+      razorpayOrderId: razorpay_order_id,
+      razorpayPaymentId: razorpay_payment_id,
+      razorpaySignature: razorpay_signature,
+      chargedAmount,
+    });
+  } catch (err) {
+    if (err?.code === "INSUFFICIENT_STOCK") {
+      req.log?.error(
+        {
+          razorpayOrderId: razorpay_order_id,
+          razorpayPaymentId: razorpay_payment_id,
+          userId: req.user._id.toString(),
+        },
+        "Payment captured but order not created (insufficient stock) — refund required",
+      );
+    }
+    throw err;
+  }
 
   return sendSuccess(res, 200, "Payment verified successfully", { orderId: order._id });
 });

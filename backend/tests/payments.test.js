@@ -23,6 +23,18 @@ jest.unstable_mockModule("../src/config/razorpay.js", () => ({
 const { default: app } = await import("../src/app.js");
 const { default: orderModel } = await import("../src/models/orderModel.js");
 const { default: cartModel } = await import("../src/models/cartModel.js");
+const { default: productModel } = await import("../src/models/productModel.js");
+
+// Force the stock of the (single) variant on the shared test product.
+const setStock = (value) =>
+  productModel.updateOne(
+    { _id: product._id, "variants.variantId": product.variants[0].variantId },
+    { $set: { "variants.$.stock": value } },
+  );
+const currentStock = async () => {
+  const fresh = await productModel.findById(product._id).lean();
+  return fresh.variants[0].stock;
+};
 
 const RZP_SECRET = process.env.RAZORPAY_KEY_SECRET;
 const sign = (orderId, paymentId) =>
@@ -148,5 +160,70 @@ describe("payments: verify signature", () => {
       .send({ razorpay_order_id: orderId });
     expect(res.status).toBe(400);
     expect(res.body.code).toBe("MISSING_PAYMENT_FIELDS");
+  });
+});
+
+describe("payments: inventory", () => {
+  const verify = (b, orderId, paymentId) =>
+    request(app)
+      .post("/api/payment/verify")
+      .set("Cookie", b.cookie)
+      .send({
+        razorpay_order_id: orderId,
+        razorpay_payment_id: paymentId,
+        razorpay_signature: sign(orderId, paymentId),
+      });
+
+  it("decrements variant stock by the ordered quantity on a successful order", async () => {
+    await addToCart(); // qty 2, variant starts at stock 10
+    ordersFetch.mockResolvedValue({ amount: 118000 });
+
+    const res = await verify(buyer, "order_stock_ok", "pay_stock_ok");
+    expect(res.status).toBe(200);
+    expect(await currentStock()).toBe(8);
+  });
+
+  it("rolls back the whole order when stock ran out after checkout → 409, no order, cart and stock untouched", async () => {
+    await addToCart(); // qty 2
+    await setStock(1); // the last units sell between checkout and payment
+    ordersFetch.mockResolvedValue({ amount: 118000 });
+
+    const res = await verify(buyer, "order_oversell", "pay_oversell");
+    expect(res.status).toBe(409);
+    expect(res.body.code).toBe("INSUFFICIENT_STOCK");
+
+    // Everything rolled back atomically: no order, cart intact, stock unchanged.
+    expect(await orderModel.countDocuments({ razorpayOrderId: "order_oversell" })).toBe(0);
+    const cart = await cartModel.findOne({ user: buyer.user.id });
+    expect(cart.items).toHaveLength(1);
+    expect(await currentStock()).toBe(1);
+  });
+
+  it("never oversells under concurrency: two buyers racing for the last unit yield exactly one order", async () => {
+    await setStock(1); // a single unit for two buyers to fight over
+    ordersFetch.mockResolvedValue({ amount: 59000 });
+
+    const buyer2 = await registerUser(app, { email: `b2_${Date.now()}@test.com` });
+    const addOne = (b) =>
+      request(app)
+        .post(`/api/cart/add/${product._id}`)
+        .set("Cookie", b.cookie)
+        .send({ variantId, quantity: 1 });
+    await addOne(buyer);
+    await addOne(buyer2);
+
+    // Fire both verifications at once; the guarded atomic decrement must let
+    // exactly one through and reject the other.
+    const [r1, r2] = await Promise.all([
+      verify(buyer, "order_race_1", "pay_race_1"),
+      verify(buyer2, "order_race_2", "pay_race_2"),
+    ]);
+
+    expect([r1.status, r2.status].sort()).toEqual([200, 409]);
+    expect([r1, r2].find((r) => r.status === 409).body.code).toBe("INSUFFICIENT_STOCK");
+
+    // One order persisted, the unit fully consumed, stock never negative.
+    expect(await orderModel.countDocuments()).toBe(1);
+    expect(await currentStock()).toBe(0);
   });
 });
