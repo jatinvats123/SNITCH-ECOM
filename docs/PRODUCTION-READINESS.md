@@ -12,8 +12,8 @@ questions I should be able to answer about this codebase.
 
 | Metric                                     | Before          | After                            | How measured                                 |
 | ------------------------------------------ | --------------- | -------------------------------- | -------------------------------------------- |
-| Automated tests                            | **0**           | **68** integration tests         | `npm test` (Jest + Supertest)                |
-| Statement coverage (`backend/src`)         | **0%**          | **94.7%** (gate enforced at 60%) | Jest `--coverage` (V8)                       |
+| Automated tests                            | **0**           | **71** integration tests         | `npm test` (Jest + Supertest)                |
+| Statement coverage (`backend/src`)         | **0%**          | **94.9%** (gate enforced at 60%) | Jest `--coverage` (V8)                       |
 | Lighthouse — Performance                   | 92              | **97**                           | Lighthouse 12, headless Chrome, catalog page |
 | Lighthouse — Accessibility                 | 90              | **100**                          | "                                            |
 | Lighthouse — Best Practices                | 96              | 96 ¹                             | "                                            |
@@ -64,10 +64,14 @@ questions I should be able to answer about this codebase.
 
 ## 2. Known limitations (honestly stated)
 
-- **Overselling: stock is never decremented on a paid order.** `order.service` snapshots
-  the cart into an order but does not reduce `variant.stock`, so the same unit can be
-  sold repeatedly. This should be part of the order-creation transaction. _Highest-value
-  remaining fix._
+- **No automated refund when a fully-paid order can't be fulfilled.** Overselling is now
+  prevented: stock is decremented atomically inside the order transaction with a guarded
+  `$inc` (`stock: { $gte: quantity }`), so two checkouts racing for the last unit cannot
+  both succeed. The residual trade-off is that decrementing at payment-verification time
+  means if inventory runs out in the small window between checkout and payment, verify
+  returns `409 INSUFFICIENT_STOCK` on an already-captured payment. That case is logged
+  loudly as "refund required"; automating the Razorpay refund (or reserving stock at
+  order-creation with a release/expiry) is the next step.
 - **Anyone can self-register as a seller.** Registration trusts a client `isSeller`
   boolean and assigns the role directly — there is no seller onboarding/verification.
   Fine for a demo marketplace, wrong for production.
@@ -150,7 +154,7 @@ buyer B fetching buyer A's order → 404).
 
 ### Q5. What's your test strategy?
 
-**Jest + Supertest + `mongodb-memory-server`** — 68 integration tests that drive the
+**Jest + Supertest + `mongodb-memory-server`** — 71 integration tests that drive the
 real Express stack over HTTP against an **in-memory MongoDB replica set** (a replica
 set, not a standalone, because order creation uses a transaction). No external database
 and no real third-party calls: the **Razorpay SDK, the mailer, and ImageKit are
@@ -160,8 +164,10 @@ statements (actual ~94%) so it can't silently rot. For speed and stability the w
 suite shares one replica set via `globalSetup` (~17 s). Coverage spans auth (validation,
 duplicate email, login, reset-token expiry, missing/expired token), RBAC 403s, product
 CRUD + pagination + search, cart add/increment/decrement-to-zero/remove + isolation
-between two users, payment valid-vs-tampered signature, and orders (created only after a
-verified payment; a buyer sees only their own).
+between two users, payment valid-vs-tampered signature and atomic stock decrement —
+including a concurrency test where two buyers race for the last unit and exactly one
+order is created — and orders (created only after a verified payment; a buyer sees only
+their own).
 
 ### Q6. What was the most serious bug you found, and how did you fix it?
 
@@ -214,12 +220,15 @@ screen.
 
 ### Q10. If this were going to real production traffic, what would you fix first?
 
-Three things, in order. **(1) Overselling** — stock isn't decremented when an order is
-paid, so I'd add the decrement (with an availability check) into the order-creation
-transaction. **(2) Seller onboarding** — registration currently trusts a client
-`isSeller` flag, so anyone can become a seller; that needs a real verification step.
-**(3) A shared rate-limit store** (Redis) so limits hold across multiple instances,
-plus a CSRF token for the cookie-based auth. After that: bump `react-router` off its
-advisories, add refresh-token rotation, and add end-to-end browser tests. I keep these
-in the "known limitations" section of this document precisely so they're visible rather
-than hidden.
+The highest-value correctness bug — **overselling** — is already fixed: stock is now
+decremented atomically inside the order transaction with a guarded `$inc`, and a
+concurrency test proves two buyers can't both take the last unit. What I'd do next, in
+order: **(1) Automate the refund** for the residual edge where a payment is captured but
+stock ran out between checkout and payment (today verify returns `409` and logs "refund
+required"); reserving stock at order-creation with a release/expiry is the fuller fix.
+**(2) Seller onboarding** — registration currently trusts a client `isSeller` flag, so
+anyone can become a seller; that needs a real verification step. **(3) A shared
+rate-limit store** (Redis) so limits hold across multiple instances, plus a CSRF token
+for the cookie-based auth. After that: bump `react-router` off its advisories, add
+refresh-token rotation, and add end-to-end browser tests. I keep these in the "known
+limitations" section of this document precisely so they're visible rather than hidden.
