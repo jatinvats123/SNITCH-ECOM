@@ -18,6 +18,8 @@ import { securityHeaders, sanitizeInput } from "./middleware/security.middleware
 import { generalLimiter } from "./middleware/rateLimit.middleware.js";
 import hpp from "hpp";
 import { AppError } from "./utils/AppError.js";
+import swaggerUi from "swagger-ui-express";
+import { openApiSpec } from "./docs/openapi.js";
 const app = express();
 
 // Behind Render/Vercel the app runs behind a TLS-terminating proxy — trust it so
@@ -110,6 +112,23 @@ app.use("/api/products", productRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/payment", paymentRouter);
 app.use("/api/orders", orderRouter);
+
+// Interactive API docs (Swagger UI) — non-production only. Swagger UI relies on
+// inline scripts/styles, so the CSP is relaxed for this route only (and only in dev).
+if (config.NODE_ENV !== "production") {
+  app.use(
+    "/api/docs",
+    (_req, res, next) => {
+      res.setHeader(
+        "Content-Security-Policy",
+        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:",
+      );
+      next();
+    },
+    swaggerUi.serve,
+    swaggerUi.setup(openApiSpec, { customSiteTitle: "Aveniq API docs" }),
+  );
+}
 
 // 404 for anything unmatched, then the central error handler.
 // These two MUST remain the last middleware registered.

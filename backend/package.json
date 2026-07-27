@@ -40,7 +40,8 @@
     "passport-google-oauth20": "^2.0.0",
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",
-    "razorpay": "^2.9.6"
+    "razorpay": "^2.9.6",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
