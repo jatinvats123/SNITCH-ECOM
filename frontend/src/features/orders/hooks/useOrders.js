@@ -1,4 +1,4 @@
-import { getMyOrders, getOrderById } from "../service/order.api";
+import { getMyOrders, getOrderById, getSellerOrders } from "../service/order.api";
 
 export const useOrders = () => {
   const handleGetMyOrders = async () => {
@@ -11,5 +11,10 @@ export const useOrders = () => {
     return data.order;
   };
 
-  return { handleGetMyOrders, handleGetOrderById };
+  const handleGetSellerOrders = async () => {
+    const data = await getSellerOrders();
+    return data.orders;
+  };
+
+  return { handleGetMyOrders, handleGetOrderById, handleGetSellerOrders };
 };

@@ -9,6 +9,15 @@ export const formatMoney = (amount, currency = "INR") => {
 // Paise -> display currency.
 export const formatPaise = (paise, currency = "INR") => formatMoney((paise ?? 0) / 100, currency);
 
+// A seller's revenue for an order = sum of its line items. The API already scopes
+// each order's items to the seller, and item unit prices are in catalog units
+// (rupees), not the paise used for order-level totals.
+export const sellerOrderTotal = (order) =>
+  (order.items || []).reduce(
+    (sum, item) => sum + (item.price?.amount || 0) * (item.quantity || 0),
+    0,
+  );
+
 export const formatOrderDate = (value) =>
   value
     ? new Date(value).toLocaleDateString("en-IN", {

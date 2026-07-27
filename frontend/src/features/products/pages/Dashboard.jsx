@@ -1,17 +1,41 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useProduct } from "../hooks/useProduct";
 import { useSelector } from "react-redux";
+import { useOrders } from "../../orders/hooks/useOrders";
+import { formatMoney, sellerOrderTotal } from "../../orders/utils/format";
+import SellerOrdersPanel from "../../orders/components/SellerOrdersPanel";
+
+const TABS = ["Overview", "Products", "Orders", "Analytics", "Settings"];
 
 const Dashboard = () => {
   const { handleGetProducts, handleDeleteProduct } = useProduct();
+  const { handleGetSellerOrders } = useOrders();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const sellerProducts = useSelector((state) => state.product.sellerProducts);
   const user = useSelector((state) => state.auth.user);
-  const [activeTab, setActiveTab] = useState("Overview");
+  const requestedTab = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(
+    TABS.includes(requestedTab) ? requestedTab : "Overview",
+  );
+  const [sellerOrders, setSellerOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const [ordersError, setOrdersError] = useState("");
 
   useEffect(() => {
     handleGetProducts();
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    handleGetSellerOrders()
+      .then((data) => active && setSellerOrders(data || []))
+      .catch(() => active && setOrdersError("We couldn't load your orders. Please try again."))
+      .finally(() => active && setOrdersLoading(false));
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleDeleteListing = async (productId, title) => {
@@ -28,13 +52,17 @@ const Dashboard = () => {
     }
   };
 
+  const paidSellerOrders = sellerOrders.filter((order) => order.status === "paid");
+  const totalSales = paidSellerOrders.reduce((sum, order) => sum + sellerOrderTotal(order), 0);
+  const salesCurrency = sellerOrders[0]?.items?.[0]?.price?.currency || "INR";
+
   const stats = [
     { label: "Total Products", value: sellerProducts?.length || 0, icon: "📦" },
-    { label: "Active Listings", value: sellerProducts?.length || 0, icon: "✨" },
-    { label: "Total Sales", value: "₹0", icon: "💰" },
+    { label: "Orders", value: sellerOrders.length, icon: "🧾" },
+    { label: "Total Sales", value: formatMoney(totalSales, salesCurrency), icon: "💰" },
   ];
 
-  const navigationItems = ["Overview", "Products", "Orders", "Analytics", "Settings"];
+  const navigationItems = TABS;
 
   const recentProducts = (sellerProducts || []).slice(0, 4);
 
@@ -310,24 +338,26 @@ const Dashboard = () => {
 
           {activeTab === "Orders" && (
             <section className="rounded-4xl border border-black/5 bg-white/75 p-6 shadow-[0_24px_80px_rgba(31,27,23,0.06)] backdrop-blur-xl sm:p-8 lg:p-10">
-              <div className="mb-8 border-b border-black/5 pb-6">
-                <p className="text-[0.7rem] uppercase tracking-[0.35em] text-[#8a7a64]">
-                  Fulfillment
-                </p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[#1f1b17] sm:text-3xl">
-                  Orders
-                </h2>
+              <div className="mb-8 flex flex-col gap-3 border-b border-black/5 pb-6 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-[0.7rem] uppercase tracking-[0.35em] text-[#8a7a64]">
+                    Fulfillment
+                  </p>
+                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[#1f1b17] sm:text-3xl">
+                    Orders
+                  </h2>
+                </div>
+                {!ordersLoading && !ordersError && sellerOrders.length > 0 ? (
+                  <span className="text-sm text-[#6d6357]">
+                    {sellerOrders.length} {sellerOrders.length === 1 ? "order" : "orders"}
+                  </span>
+                ) : null}
               </div>
-              <div className="rounded-[1.75rem] border border-dashed border-black/10 bg-[#fbf8f3] px-6 py-16 text-center sm:px-10">
-                <p className="text-sm uppercase tracking-[0.3em] text-[#8a7a64]">No orders yet</p>
-                <h3 className="mt-4 text-2xl font-semibold tracking-tight text-[#1f1b17]">
-                  Orders will show up here
-                </h3>
-                <p className="mx-auto mt-3 max-w-md text-base leading-7 text-[#6d6357]">
-                  Once a customer checks out with one of your products, it'll appear in this list
-                  for you to track and fulfill.
-                </p>
-              </div>
+              <SellerOrdersPanel
+                orders={sellerOrders}
+                loading={ordersLoading}
+                error={ordersError}
+              />
             </section>
           )}
 

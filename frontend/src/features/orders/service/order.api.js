@@ -16,3 +16,10 @@ export async function getOrderById(orderId) {
   const response = await orderApiInstance.get(`/${orderId}`);
   return response.data;
 }
+
+// Orders that contain the authenticated seller's products. The server scopes each
+// order's line items down to that seller's own products.
+export async function getSellerOrders() {
+  const response = await orderApiInstance.get("/seller");
+  return response.data;
+}

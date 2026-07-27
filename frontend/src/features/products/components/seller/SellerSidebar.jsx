@@ -16,7 +16,7 @@ function SellerSidebar() {
             {NAV.map((item) => (
               <button
                 key={item}
-                onClick={() => item === "Products" && navigate("/seller/dashboard")}
+                onClick={() => navigate(`/seller/dashboard?tab=${item}`)}
                 className={`flex w-full items-center justify-between rounded-full px-4 py-3 text-left text-sm transition-colors ${
                   item === "Products"
                     ? "bg-[#1f1b17] text-[#f7f3ec]"
