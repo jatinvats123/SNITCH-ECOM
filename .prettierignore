@@ -12,3 +12,6 @@ vercel.json
 
 # Point-in-time Phase 0 audit report — preserved verbatim, not reformatted.
 AUDIT.md
+
+# Curated top-level README — hand-authored, not auto-formatted.
+/README.md
