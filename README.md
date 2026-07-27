@@ -1,238 +1,350 @@
-# Aveniq
+Aveniq
+A full-stack e-commerce marketplace where sellers list products with variants and buyers check out through Razorpay.
 
-A full-stack e-commerce marketplace with buyer and seller roles, product variants, cart management, and live payments.
+     
 
-**Live demo → [aveniq-sooty.vercel.app](https://aveniq-sooty.vercel.app)**
+Live demo →  ·  API docs →
 
-[![CI](https://github.com/jatinvats123/SNITCH-ECOM/actions/workflows/ci.yml/badge.svg)](https://github.com/jatinvats123/SNITCH-ECOM/actions/workflows/ci.yml)
-![Coverage](https://img.shields.io/badge/coverage-93%25%20statements-brightgreen)
 
-![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
-![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-2.x-764ABC?logo=redux&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)
-![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb&logoColor=white)
-![Razorpay](https://img.shields.io/badge/Razorpay-Payments-0C2451?logo=razorpay&logoColor=white)
 
----
 
-## Overview
+Overview
+Aveniq is a MERN marketplace with two distinct user journeys. Sellers register, list products with multiple variants (size, colour, price) and up to seven images per product served from a CDN. Buyers browse the catalog, add specific variants to a cart, and complete payment through Razorpay with server-side signature verification.
 
-Aveniq is a MERN marketplace where sellers list products with multiple variants and images, and buyers browse, add to cart, and check out through Razorpay. Authentication supports both email/password and Google OAuth, with role-based access separating buyer and seller capabilities.
+The backend is deliberately layered. Routes stay thin, validation runs before controllers, business logic sits in services, and all database access is isolated behind a data-access layer. Each concern can change without touching the others — the payment provider could be swapped without editing a single controller.
 
-The backend is deliberately layered — routes stay thin, validation runs before controllers, business logic sits in services, and database access is isolated in a DAO layer — so that each concern can change without touching the others.
+Authentication uses JWTs delivered as HTTP-only cookies rather than localStorage, which removes an entire class of XSS token-theft attacks. Google OAuth 2.0 is supported alongside email/password.
 
----
 
-## Features
+Features
+Authentication & authorization
 
-### Authentication
+Email/password registration with server-side validation
+Google OAuth 2.0 sign-in via Passport
+JWT issued as an HTTP-only, secure, sameSite cookie
+Forgot-password and token-based reset over SMTP
+Role-based access control separating buyer and seller capabilities
+Ownership enforcement — a seller cannot read or mutate another seller's resources
 
-- Email and password registration with server-side validation
-- Google OAuth 2.0 sign-in via Passport
-- JWT issued as an HTTP-only cookie
-- Forgot-password and token-based reset flows delivered over SMTP
-- Role-based access control with `buyer` and `seller` roles
+Seller
 
-### Seller
+Create products with up to 7 images per upload
+Add and remove variants with independent pricing
+Manage own listings and view orders containing own products
 
-- Create products with up to 7 images per upload
-- Add and remove product variants (size, colour, pricing)
-- View and manage own product listings
-- Images uploaded through Multer and served from the ImageKit CDN
+Buyer
 
-### Buyer
+Browse catalog with filtering and pagination
+Variant-level cart with increment, decrement, and remove
+Razorpay checkout with signature verification and payment-failure handling
+Order history and order detail
 
-- Browse the full catalog and view product detail pages
-- Add items to cart at the variant level
-- Increment, decrement, and remove cart items
-- Checkout with Razorpay, including server-side signature verification and payment-failure handling
+Production
 
----
+Helmet, rate limiting, request sanitisation, CORS allow-list
+Centralised error handling with consistent error envelopes
+Structured JSON logging with per-request correlation IDs
+Health and readiness endpoints
+40+ integration tests running in CI
 
-## Tech stack
 
-| Layer    | Technologies                                                         |
-| -------- | -------------------------------------------------------------------- |
-| Frontend | React 19, Redux Toolkit, React Router 7, Tailwind CSS 4, Axios, Vite |
-| Backend  | Node.js, Express 5, MongoDB, Mongoose                                |
-| Auth     | JWT, bcryptjs, Passport (Google OAuth 2.0), express-validator        |
-| Payments | Razorpay                                                             |
-| Media    | Multer, ImageKit                                                     |
-| Email    | Nodemailer over SMTP                                                 |
+Tech stack
+Layer
+Technologies
+Frontend
+React 19, Redux Toolkit, React Router 7, Tailwind CSS 4, Vite, Axios
+Backend
+Node.js 20, Express 5, MongoDB, Mongoose
+Auth
+JWT, bcryptjs, Passport (Google OAuth 2.0), express-validator
+Payments
+Razorpay
+Media
+Multer, ImageKit CDN
+Email
+Nodemailer over SMTP
+Testing
+Jest, Supertest, mongodb-memory-server
+Ops
+Docker, Docker Compose, GitHub Actions, Pino
 
----
 
-## Architecture
 
-```
-Request
-   │
-   ▼
-routes/         thin routing, no logic
-   │
-   ▼
-validator/      express-validator rules, rejects bad input early
-   │
-   ▼
-middleware/     authenticateUser / authenticateSeller — JWT + role checks
-   │
-   ▼
-controller/     orchestrates the request, shapes the response
-   │
-   ▼
-services/ dao/  external integrations (ImageKit, mailer) and DB access
-   │
-   ▼
-models/         Mongoose schemas
-```
+Architecture
+                    ┌──────────────┐
 
-Each request passes validation and authentication before reaching a controller, so controllers can assume a valid, authorised request.
+   Browser ───────► │  React SPA   │  Redux Toolkit · feature-sliced
 
----
+                    └──────┬───────┘
 
-## API reference
+                           │ HTTPS · HTTP-only cookie
 
-Base URL: `/api`
+                           ▼
 
-### Auth — `/api/auth`
+                    ┌──────────────┐
 
-| Method | Endpoint                 | Access  | Description                           |
-| ------ | ------------------------ | ------- | ------------------------------------- |
-| POST   | `/register`              | Public  | Register a new account                |
-| POST   | `/login`                 | Public  | Log in and receive a JWT cookie       |
-| POST   | `/logout`                | Public  | Clear the session cookie              |
-| GET    | `/google`                | Public  | Start Google OAuth flow               |
-| GET    | `/google/callback`       | Public  | OAuth callback handler                |
-| GET    | `/me`                    | Private | Get the current authenticated user    |
-| POST   | `/forgot-password`       | Public  | Send a password-reset email           |
-| POST   | `/reset-password/:token` | Public  | Reset password using an emailed token |
+                    │  Express API │
 
-### Products — `/api/products`
+                    └──────┬───────┘
 
-| Method | Endpoint                          | Access | Description                    |
-| ------ | --------------------------------- | ------ | ------------------------------ |
-| GET    | `/`                               | Public | List all products              |
-| GET    | `/detail/:productId`              | Public | Get a single product           |
-| POST   | `/`                               | Seller | Create a product with images   |
-| GET    | `/seller`                         | Seller | List the seller's own products |
-| DELETE | `/:productId`                     | Seller | Delete a product               |
-| POST   | `/:productId/variants`            | Seller | Add a variant                  |
-| DELETE | `/:productId/variants/:variantId` | Seller | Delete a variant               |
+                           │
 
-### Cart — `/api/cart`
+   ┌───────────────────────┼───────────────────────┐
 
-| Method | Endpoint                                     | Access  | Description                 |
-| ------ | -------------------------------------------- | ------- | --------------------------- |
-| GET    | `/`                                          | Private | Get the current user's cart |
-| POST   | `/add/:productId`                            | Private | Add an item to the cart     |
-| PATCH  | `/quantity/increament/:productId/:variantId` | Private | Increase quantity           |
-| PATCH  | `/quantity/decrement/:productId/:variantId`  | Private | Decrease quantity           |
-| DELETE | `/remove/:productId/:variantId`              | Private | Remove an item              |
+   │                       │                       │
 
-### Payment — `/api/payment`
+   ▼                       ▼                       ▼
 
-| Method | Endpoint        | Access  | Description                  |
-| ------ | --------------- | ------- | ---------------------------- |
-| POST   | `/create-order` | Private | Create a Razorpay order      |
-| POST   | `/verify`       | Private | Verify the payment signature |
-| POST   | `/failure`      | Private | Record a failed payment      |
+routes/              middleware/              validator/
 
----
+thin routing      JWT + role checks       express-validator
 
-## Getting started
+   │                       │                       │
 
-### Prerequisites
+   └───────────────────────┼───────────────────────┘
 
-- Node.js 18 or higher
-- A MongoDB instance (local or Atlas)
-- Razorpay, ImageKit, Google OAuth, and SMTP credentials
+                           ▼
 
-### Setup
+                     controller/          orchestration, response shaping
 
-```bash
-git clone https://github.com/jatinvats123/aveniq.git
-cd aveniq
-```
+                           ▼
 
-**Backend**
+                  services/  ·  dao/       integrations · database access
 
-```bash
-cd backend
-npm install
-npm run dev          # starts on the configured PORT
-```
+                           ▼
 
-Create `backend/.env`:
+                       models/             Mongoose schemas
 
-```env
-MONGO_URI=
-JWT_SECRET=
-CLIENT_URL=http://localhost:5173
-NODE_ENV=development
+                           ▼
 
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GOOGLE_CALLBACK_URL=
+                    ┌──────────────┐
 
-RAZORPAY_KEY_ID=
-RAZORPAY_KEY_SECRET=
+                    │   MongoDB    │
 
-IMAGEKIT_PRIVATE_KEY=
+                    └──────────────┘
 
-SMTP_HOST=
-SMTP_PORT=
-SMTP_USER=
-SMTP_PASS=
-EMAIL_FROM=
-```
+External: ImageKit (media) · Razorpay (payments) · SMTP (email)
 
-**Frontend**
+A request passes validation and authentication before reaching a controller, so controllers can assume a valid, authorised request. Errors thrown anywhere bubble to a single error middleware.
 
-```bash
-cd frontend
-npm install
-npm run dev          # http://localhost:5173
-```
 
-> `.env` files are gitignored. Never commit real credentials.
-
----
-
-## Project structure
-
-```
+Folder structure
 aveniq/
+
 ├── backend/
+
+│   ├── server.js                 # process entry, signal handling
+
 │   └── src/
-│       ├── config/        db, razorpay, and env configuration
-│       ├── routes/        auth, product, cart, payment
-│       ├── validator/     express-validator rule sets
-│       ├── middleware/    JWT and role guards
-│       ├── controller/    request handlers
-│       ├── services/      ImageKit storage service
-│       ├── dao/           product and cart data access
-│       ├── models/        user, product, cart, order schemas
-│       └── utils/         mailer
-└── frontend/
-    └── src/
-        ├── app/           Redux store
-        ├── features/      auth, products, cart slices
-        └── components/    shared UI
-```
 
----
+│       ├── app.js                # express app assembly, middleware chain
 
-## Roadmap
+│       ├── config/               # env validation, db, razorpay, logger
 
-- Order history and buyer-facing order tracking
-- Product search, filtering, and pagination
-- Seller analytics dashboard
-- Automated test coverage for auth and payment flows
-- Rate limiting on authentication endpoints
+│       ├── routes/               # thin route definitions
 
----
+│       ├── validator/            # express-validator rule sets
 
-## Author
+│       ├── middleware/           # auth, rbac, error handler, rate limits
 
-**Jatin Vats** — [GitHub](https://github.com/jatinvats123) · [LinkedIn](https://linkedin.com/in/jatin-vats-dev)
+│       ├── controller/           # request orchestration
+
+│       ├── services/             # business logic, external integrations
+
+│       ├── dao/                  # database access, tenant/owner scoping
+
+│       ├── models/               # mongoose schemas + indexes
+
+│       └── utils/                # AppError, asyncHandler, mailer
+
+│   └── tests/                    # integration + unit tests
+
+│
+
+├── frontend/
+
+│   └── src/
+
+│       ├── app/                  # App shell, routes, store
+
+│       ├── components/           # shared presentational components
+
+│       └── features/
+
+│           ├── auth/             # pages, hooks, services, slice
+
+│           ├── cart/
+
+│           ├── orders/
+
+│           └── products/
+
+│
+
+├── docs/
+
+│   ├── adr/                      # architecture decision records
+
+│   ├── screenshots/
+
+│   └── PRODUCTION-READINESS.md
+
+├── .github/workflows/ci.yml
+
+├── docker-compose.yml
+
+└── README.md
+
+
+Setup
+Prerequisites: Node.js 20+, MongoDB 6+ (or Docker), npm 10+
+
+git clone https://github.com/jatinvats123/aveniq.git
+
+cd aveniq
+
+# Option A — Docker (recommended)
+
+cp backend/.env.example backend/.env      # fill in values
+
+cp frontend/.env.example frontend/.env
+
+docker compose up --build                 # app on http://localhost:5173
+
+# Option B — local
+
+npm install                               # installs both workspaces
+
+npm run dev                               # api :3000, web :5173
+
+Common scripts
+
+npm run dev            # both packages in watch mode
+
+npm run test           # full test suite
+
+npm run test:coverage  # with coverage report
+
+npm run lint           # eslint + prettier check
+
+npm run build          # production build
+
+
+Environment variables
+backend/.env
+
+Variable
+Required
+Description
+PORT
+no
+API port. Defaults to 3000
+NODE_ENV
+yes
+development | production | test
+MONGODB_URI
+yes
+MongoDB connection string
+JWT_SECRET
+yes
+Signing secret. Use 32+ random bytes
+JWT_EXPIRES_IN
+no
+Token lifetime. Defaults to 7d
+CLIENT_ORIGIN
+yes
+Comma-separated CORS allow-list
+GOOGLE_CLIENT_ID
+yes
+Google OAuth client ID
+GOOGLE_CLIENT_SECRET
+yes
+Google OAuth client secret
+GOOGLE_CALLBACK_URL
+yes
+OAuth redirect URI
+RAZORPAY_KEY_ID
+yes
+Razorpay public key
+RAZORPAY_KEY_SECRET
+yes
+Razorpay secret — server only
+IMAGEKIT_PUBLIC_KEY
+yes
+ImageKit public key
+IMAGEKIT_PRIVATE_KEY
+yes
+ImageKit private key
+IMAGEKIT_URL_ENDPOINT
+yes
+ImageKit delivery URL
+SMTP_HOST / SMTP_PORT
+yes
+Mail transport
+SMTP_USER / SMTP_PASS
+yes
+Mail credentials
+LOG_LEVEL
+no
+Pino level. Defaults to info
+
+
+frontend/.env
+
+Variable
+Required
+Description
+VITE_API_BASE_URL
+yes
+API base URL
+VITE_RAZORPAY_KEY_ID
+yes
+Razorpay public key (safe client-side)
+
+
+Never commit .env. Only .env.example is tracked.
+
+
+Screenshots
+
+
+
+
+
+
+Catalog with filtering
+
+
+Variant selection
+
+
+Variant-level cart
+
+
+Razorpay checkout
+
+
+Seller listings
+
+
+Buyer order history
+
+
+
+Future improvements
+Product search backed by a proper text index or a dedicated search service
+Seller payouts and settlement reporting
+Inventory reservation during checkout to prevent overselling
+Review and rating system with verified-purchase gating
+Refund and return workflow through the Razorpay refunds API
+Redis caching for the catalog with event-driven invalidation
+Migration of the order domain to a state machine with an audit trail
+
+
+License
+Released under the MIT License. See LICENSE.
+
+
+Contact
+Jatin Vats — Full Stack Developer, Delhi, India Email · LinkedIn · GitHub
+
