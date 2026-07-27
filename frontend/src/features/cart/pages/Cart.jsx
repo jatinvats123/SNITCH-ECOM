@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useCart } from "../hooks/useCart";
 import { useNavigate } from "react-router";
@@ -17,19 +17,34 @@ const Cart = () => {
   const navigate = useNavigate();
   const [quantities, setQuantities] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
+  const [checkoutNotice, setCheckoutNotice] = useState(null);
+  const noticeRef = useRef(null);
 
   useEffect(() => {
     handleGetCart();
   }, []);
 
+  // Bring a checkout notice into view when it appears — the Razorpay popup has
+  // just closed and the banner may be above the fold.
+  useEffect(() => {
+    if (checkoutNotice) {
+      noticeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [checkoutNotice]);
+
   const handlePayment = async () => {
     if (isProcessing) return;
     setIsProcessing(true);
+    setCheckoutNotice(null);
     try {
       // 1. Create the order on the backend (amount is computed server-side from the cart).
       const orderData = await createOrder();
       if (!orderData?.success) {
-        alert(orderData?.message || "Unable to start checkout. Please try again.");
+        setCheckoutNotice({
+          tone: "error",
+          title: "Couldn't start checkout",
+          body: orderData?.message || "Unable to start checkout. Please try again.",
+        });
         setIsProcessing(false);
         return;
       }
@@ -43,7 +58,8 @@ const Cart = () => {
         description: "Order Payment",
         order_id: orderData.razorpayOrderId, // generated on the server
         handler: async (response) => {
-          // 3. Verify the payment signature on the backend.
+          // 3. Verify the payment signature on the backend. A verified payment
+          // creates the order and decrements stock in one transaction.
           try {
             const result = await verifyPayment({
               razorpay_order_id: response.razorpay_order_id,
@@ -51,14 +67,39 @@ const Cart = () => {
               razorpay_signature: response.razorpay_signature,
             });
             if (result?.success) {
-              alert("Payment successful! Your order has been placed.");
-              await handleGetCart(); // refresh the cart (now empty)
+              await handleGetCart(); // cart is now cleared server-side
+              navigate("/orders"); // show the freshly placed order
             } else {
-              alert(result?.message || "Payment verification failed. Please contact support.");
+              setCheckoutNotice({
+                tone: "error",
+                title: "Payment verification failed",
+                body: result?.message || "Please contact support if you were charged.",
+              });
             }
           } catch (err) {
-            console.error("Verification error:", err);
-            alert("Payment verification failed. Please contact support.");
+            const data = err?.response?.data;
+            if (data?.code === "INSUFFICIENT_STOCK") {
+              // The payment was captured, but stock ran out before we could confirm
+              // the order, so the server rejected it rather than oversell. Be honest:
+              // the charge will be refunded.
+              await handleGetCart(); // reflect current availability in the cart
+              setCheckoutNotice({
+                tone: "soldout",
+                title: "Item sold out during checkout",
+                body: `${
+                  data.message || "An item in your cart is no longer available."
+                } Your payment was received and will be refunded — if you don't see it shortly, contact support with reference ${response.razorpay_payment_id}.`,
+              });
+            } else {
+              console.error("Verification error:", err);
+              setCheckoutNotice({
+                tone: "error",
+                title: "Payment verification failed",
+                body:
+                  data?.message ||
+                  "We couldn't verify your payment. Please contact support if you were charged.",
+              });
+            }
           } finally {
             setIsProcessing(false);
           }
@@ -94,7 +135,11 @@ const Cart = () => {
           razorpay_order_id: orderData.razorpayOrderId,
           reason: response.error?.description,
         });
-        alert("Payment failed. Please try again.");
+        setCheckoutNotice({
+          tone: "error",
+          title: "Payment failed",
+          body: response.error?.description || "Your payment didn't go through. Please try again.",
+        });
         setIsProcessing(false);
       });
 
@@ -102,11 +147,14 @@ const Cart = () => {
     } catch (error) {
       // Surface the real reason (network error, blocked script, backend message, ...)
       console.error("Checkout error:", error);
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Something went wrong during checkout. Please try again.";
-      alert(message);
+      setCheckoutNotice({
+        tone: "error",
+        title: "Checkout error",
+        body:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Something went wrong during checkout. Please try again.",
+      });
       setIsProcessing(false);
     }
   };
@@ -224,6 +272,36 @@ const Cart = () => {
             {cartItems.length} {cartItems.length === 1 ? "item" : "items"} in your cart
           </p>
         </div>
+
+        {checkoutNotice && (
+          <div
+            ref={noticeRef}
+            role="alert"
+            aria-live="assertive"
+            className={`mb-10 flex items-start gap-4 rounded-lg border p-5 sm:p-6 ${
+              checkoutNotice.tone === "soldout"
+                ? "border-amber-500/60 bg-amber-50 text-amber-900"
+                : "border-red-500/60 bg-red-50 text-red-900"
+            }`}
+          >
+            <span aria-hidden="true" className="mt-0.5 text-lg leading-none">
+              {checkoutNotice.tone === "soldout" ? "⚠" : "✕"}
+            </span>
+            <div className="flex-1">
+              <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.25em]">
+                {checkoutNotice.title}
+              </p>
+              <p className="text-sm leading-relaxed">{checkoutNotice.body}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCheckoutNotice(null)}
+              className="shrink-0 text-xs font-medium uppercase tracking-[0.2em] underline underline-offset-4 hover:no-underline"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Cart Items */}
